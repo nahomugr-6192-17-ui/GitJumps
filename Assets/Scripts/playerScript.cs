@@ -5,8 +5,10 @@ public class playerScript : MonoBehaviour
 {
     private Rigidbody2D rb;
     public float jumpForce = 10f;
-    public float moveSpeed = 5f;
+    public float moveSpeed = 8f;
     bool isGrounded = false;
+    public GameObject platform1;
+    public GameObject platform2;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -32,14 +34,20 @@ public class playerScript : MonoBehaviour
         {
             rb.linearVelocityX = 0;
         }
+
+        float distance = Vector3.Distance(
+            platform1.transform.position,
+            platform2.transform.position
+        );
+        Debug.Log("Distance: " + distance);
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Floor"))
+        if (collision.gameObject.CompareTag("Floor") || collision.gameObject.CompareTag("Platform"))
         {
             isGrounded = true;
-            if ((Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed))
+            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)
             {
                 rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             }
@@ -48,7 +56,7 @@ public class playerScript : MonoBehaviour
 
     void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Floor"))
+        if (collision.gameObject.CompareTag("Floor") || collision.gameObject.CompareTag("Platform"))
         {
             isGrounded = false;
         }

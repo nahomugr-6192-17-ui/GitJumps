@@ -6,13 +6,16 @@ public class playerScript : MonoBehaviour
     private Rigidbody2D rb;
     public float jumpForce = 10f;
     public float moveSpeed = 8f;
-    bool isGrounded = false;
-    public GameObject platform1;
-    public GameObject platform2;
+    public bool isGrounded = false;
+    public GameObject ground;
+    private GameObject camera;
+    /*public GameObject platform1;
+    public GameObject platform2;*/ 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        camera = GameObject.Find("Main Camera");
     }
 
     // Update is called once per frame
@@ -35,11 +38,11 @@ public class playerScript : MonoBehaviour
             rb.linearVelocityX = 0;
         }
 
-        float distance = Vector3.Distance(
+        /*float distance = Vector3.Distance(
             platform1.transform.position,
             platform2.transform.position
         );
-        Debug.Log("Distance: " + distance);
+        Debug.Log("Distance: " + distance);*/
     }
 
     void OnCollisionEnter2D(Collision2D collision)

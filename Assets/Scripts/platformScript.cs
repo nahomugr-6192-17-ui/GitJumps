@@ -1,27 +1,116 @@
+
 using UnityEngine;
+using System.Collections.Generic;
 
 public class platformScript : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [Header("Platform Movement")]
     public float startingSpeed = 0.0000002f;
     public float maxSpeed = 8f;
     public float speedIncreaseRate = 0.1f;
+
     private float currentSpeed;
+
+    [Header("Number of Platforms")]
+    public int numberOfPlatforms = 4;
+
+    [Header("Horizontal Movement")]
+    public float horizontalSpeed = 3f;
+    public float minX = -8f;
+    public float maxX = 8f;
+
+    private GameObject activePlatform;
+    private int horizontalDirection = 1;
+
     void Start()
     {
         currentSpeed = startingSpeed;
+        NumOfPlatforms();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        //platformMovement();
+        // PlatformMovement();
+        MoveActivePlatform();
     }
 
-    void platformMovement()
+    private void NumOfPlatforms()
+    {
+        Transform[] children = GetComponentsInChildren<Transform>(true);
+        List<GameObject> platforms = new List<GameObject>();
+
+        foreach (Transform child in children)
+        {
+            if (child != transform && child.CompareTag("Platform"))
+            {
+                platforms.Add(child.gameObject);
+            }
+        }
+
+        if (platforms.Count == 0)
+        {
+            Debug.LogWarning("No child platforms found in this BlockContainer.");
+            return;
+        }
+
+        // Deactivate all platforms first.
+        foreach (GameObject platform in platforms)
+        {
+            platform.SetActive(false);
+        }
+
+        // Choose how many platforms to activate.
+        int activeCount = Random.Range(
+            1,
+            Mathf.Min(numberOfPlatforms, platforms.Count) + 1
+        );
+
+        // Shuffle the list so we don't select the same platform twice.
+        for (int i = 0; i < activeCount; i++)
+        {
+            int randomIndex = Random.Range(i, platforms.Count);
+
+            GameObject temp = platforms[i];
+            platforms[i] = platforms[randomIndex];
+            platforms[randomIndex] = temp;
+
+            platforms[i].SetActive(true);
+        }
+
+        // Only move a platform if exactly one was activated.
+        activePlatform = activeCount == 1 ? platforms[0] : null;
+        horizontalDirection = 1;
+    }
+
+    private void MoveActivePlatform()
+    {
+        if (activePlatform == null || !activePlatform.activeSelf)
+            return;
+
+        float newX = activePlatform.transform.position.x
+                     + horizontalDirection * horizontalSpeed * Time.deltaTime;
+
+        if (newX >= maxX)
+        {
+            newX = maxX;
+            horizontalDirection = -1;
+        }
+        else if (newX <= minX)
+        {
+            newX = minX;
+            horizontalDirection = 1;
+        }
+
+        Vector3 position = activePlatform.transform.position;
+        position.x = newX;
+        activePlatform.transform.position = position;
+    }
+
+    private void PlatformMovement()
     {
         currentSpeed += speedIncreaseRate * Time.deltaTime;
         currentSpeed = Mathf.Clamp(currentSpeed, startingSpeed, maxSpeed);
+
         transform.position += Vector3.down * currentSpeed * Time.deltaTime;
     }
 }

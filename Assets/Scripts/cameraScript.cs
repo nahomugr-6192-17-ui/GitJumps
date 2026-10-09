@@ -18,6 +18,7 @@ public class cameraScript : MonoBehaviour
     public float smoothSpeed = 5f;
 
     private Rigidbody2D playerRb;
+    private Collider2D playerCol;
 
     private bool cameraLocked = false;
     private bool playerIsFalling = false;
@@ -50,11 +51,11 @@ public class cameraScript : MonoBehaviour
             if (player.transform.position.y >= gameplayCameraY)
             {
                 cameraLocked = true;
-                ground.transform.position = new Vector3(
+                /*ground.transform.position = new Vector3(
                     ground.transform.position.x,
                     fallGroundY,
                     ground.transform.position.z
-                );
+                );*/
             }
         }
 
@@ -77,7 +78,7 @@ public class cameraScript : MonoBehaviour
 
         if (playerIsFalling)
         {
-            targetY = fallCameraY;
+            targetY = 0f;
         }
         else if (cameraLocked)
         {

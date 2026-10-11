@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class playerScript : MonoBehaviour
 {
@@ -10,13 +11,18 @@ public class playerScript : MonoBehaviour
     public bool isGrounded = false;
     public GameObject ground;
     private GameObject camera;
-    public GameObject platform1;
-    public GameObject platform2;
+    /*public GameObject platform1;
+    public GameObject platform2;*/
+    private HashSet<GameObject> scoredContainers = new HashSet<GameObject>();
+    private int currentScore = 0;
+    private int highScore = 0;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         camera = GameObject.Find("Main Camera");
+        currentScore = 0;
     }
 
     // Update is called once per frame
@@ -39,11 +45,11 @@ public class playerScript : MonoBehaviour
             rb.linearVelocityX = 0;
         }
 
-        float distance = Vector3.Distance(
+        /*float distance = Vector3.Distance(
             platform1.transform.position,
             platform2.transform.position
         );
-        Debug.Log("Distance: " + distance);
+        Debug.Log("Distance: " + distance);*/
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -83,4 +89,24 @@ public class playerScript : MonoBehaviour
             jumpForceMultiplier = 1.1f;
         }
     }
+
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("BlockContainer"))
+        {
+            if (scoredContainers.Add(collision.gameObject))
+            {
+                currentScore++;
+                /*if (currentScore > highScore)
+                {
+                    highScore = currentScore;
+                    PlayerPrefs.SetInt("HighScore", highScore);
+                }*/
+                PlayerPrefs.SetInt("Score", currentScore);
+                Debug.Log("Score: " + currentScore);
+            }
+        }
+    }
+
 }

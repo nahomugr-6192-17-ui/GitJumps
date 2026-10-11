@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Floor
   - Platform
+  - BlockContainer
   layers:
   - Default
   - TransparentFX

@@ -5,9 +5,11 @@ using System.Collections.Generic;
 public class platformScript : MonoBehaviour
 {
     [Header("Platform Movement")]
-    public float startingSpeed = 0.0000002f;
+    public float startingSpeed = 0.2f;
     public float maxSpeed = 8f;
     public float speedIncreaseRate = 0.1f;
+    public bool playerIsStandingOnThisPlatform = false;
+    public Transform player;
 
     private float currentSpeed;
 
@@ -82,13 +84,14 @@ public class platformScript : MonoBehaviour
         horizontalDirection = 1;
     }
 
+
     private void MoveActivePlatform()
     {
         if (activePlatform == null || !activePlatform.activeSelf)
             return;
 
         float newX = activePlatform.transform.position.x
-                     + horizontalDirection * horizontalSpeed * Time.deltaTime;
+            + horizontalDirection * horizontalSpeed * Time.deltaTime;
 
         if (newX >= maxX)
         {
@@ -101,9 +104,26 @@ public class platformScript : MonoBehaviour
             horizontalDirection = 1;
         }
 
-        Vector3 position = activePlatform.transform.position;
-        position.x = newX;
-        activePlatform.transform.position = position;
+        Vector3 previousPosition = activePlatform.transform.position;
+
+        activePlatform.transform.position = new Vector3(
+            newX,
+            previousPosition.y,
+            previousPosition.z
+        );
+
+        Vector3 movementDelta =
+            activePlatform.transform.position - previousPosition;
+
+        if (playerIsStandingOnThisPlatform && player != null)
+        {
+            player.position += movementDelta;
+        }
+    }
+
+    public void SetPlayerStanding(bool isStanding)
+    {
+        playerIsStandingOnThisPlatform = isStanding;
     }
 
     private void PlatformMovement()

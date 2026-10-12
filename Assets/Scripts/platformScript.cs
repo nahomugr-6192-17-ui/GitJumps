@@ -5,9 +5,9 @@ using System.Collections.Generic;
 public class platformScript : MonoBehaviour
 {
     [Header("Platform Movement")]
-    public float startingSpeed = 0.2f;
+    public float startingSpeed = 0.0002f;
     public float maxSpeed = 8f;
-    public float speedIncreaseRate = 0.1f;
+    public float speedIncreaseRate = 0.01f;
     public bool playerIsStandingOnThisPlatform = false;
     public Transform player;
 
@@ -23,16 +23,23 @@ public class platformScript : MonoBehaviour
 
     private GameObject activePlatform;
     private int horizontalDirection = 1;
+    public playerScript playerScript;
 
     void Start()
     {
         currentSpeed = startingSpeed;
         NumOfPlatforms();
+        GameObject playerObject = GameObject.FindWithTag("Player");
+
+        if (playerObject != null)
+        {
+            playerScript = playerObject.GetComponent<playerScript>();
+        }
     }
 
     void Update()
     {
-        // PlatformMovement();
+        //PlatformMovement();
         MoveActivePlatform();
     }
 
@@ -128,9 +135,12 @@ public class platformScript : MonoBehaviour
 
     private void PlatformMovement()
     {
-        currentSpeed += speedIncreaseRate * Time.deltaTime;
-        currentSpeed = Mathf.Clamp(currentSpeed, startingSpeed, maxSpeed);
+        if (playerScript.currentScore >= 1)
+        {
+            currentSpeed += speedIncreaseRate * Time.deltaTime;
+            currentSpeed = Mathf.Clamp(currentSpeed, startingSpeed, maxSpeed);
 
-        transform.position += Vector3.down * currentSpeed * Time.deltaTime;
+            transform.position += Vector3.down * currentSpeed * Time.deltaTime;
+        }
     }
 }

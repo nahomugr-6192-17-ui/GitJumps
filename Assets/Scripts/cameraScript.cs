@@ -6,13 +6,13 @@ public class cameraScript : MonoBehaviour
     public GameObject ground;
 
     [Header("Camera Positions")]
-    public float gameplayCameraY = 1.05f;
+    public float gameplayCameraY = 1.4f;
     public float fallCameraY = -14.5f;
     public float initialCameraY = 0f;
-    public float fallGroundY = -20f;
+    public float fallGroundY = -24f;
 
     [Header("Player Detection")]
-    public float playerFallY = -3.5f;
+    public float playerFallY = -8.57f;
 
     [Header("Camera Movement")]
     public float smoothSpeed = 5f;
@@ -48,7 +48,7 @@ public class cameraScript : MonoBehaviour
         {
             // Once the player reaches the gameplay height,
             // lock the camera at Y = 1.05
-            if (player.transform.position.y >= gameplayCameraY)
+            if (player.transform.position.y >= -5f)
             {
                 cameraLocked = true;
                 ground.transform.position = new Vector3(

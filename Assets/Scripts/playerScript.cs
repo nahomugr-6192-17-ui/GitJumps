@@ -11,18 +11,20 @@ public class playerScript : MonoBehaviour
     public bool isGrounded = false;
     public GameObject ground;
     private GameObject camera;
-    public GameObject platform1;
-    public GameObject platform2;
+    /*public GameObject platform1;
+    public GameObject platform2;*/
     private HashSet<GameObject> scoredContainers = new HashSet<GameObject>();
     public int currentScore = 0;
     private int highScore = 0;
     private platformScript standingPlatform;
+    public platformSpawnerScript spawnerController;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         camera = GameObject.Find("Main Camera");
         currentScore = 0;
+        spawnerController = FindAnyObjectByType<platformSpawnerScript>();
     }
 
     // Update is called once per frame
@@ -44,12 +46,13 @@ public class playerScript : MonoBehaviour
         {
             rb.linearVelocityX = 0;
         }
+        /*
 
         float distance = Vector3.Distance(
             platform1.transform.position,
             platform2.transform.position
         );
-        Debug.Log("Distance: " + distance);
+        Debug.Log("Distance: " + distance);*/
     }
 
 
@@ -135,28 +138,37 @@ public class playerScript : MonoBehaviour
     private void Jump()
     {
         StopPlatformCarry();
-
+        float usedMultiplier = jumpForceMultiplier;
         isGrounded = false;
         rb.linearVelocityY = 0f;
         rb.AddForce(
-            Vector2.up * jumpForce * jumpForceMultiplier,
+            Vector2.up * jumpForce * usedMultiplier,
             ForceMode2D.Impulse
         );
 
-        int jumpCount = PlayerPrefs.GetInt("JumpCount", 0);
-        jumpCount++;
+        int jumpCount = Random.Range(1, 3);
+        spawnerController.normalPlatformSpeed = 0.2f; // Reset to default speed before applying new multiplier
+        //jumpCount++;
 
         PlayerPrefs.SetInt("JumpCount", jumpCount);
 
         if (jumpCount == 2)
         {
             jumpForceMultiplier = 1.3f;
-            jumpCount = 0;
             PlayerPrefs.SetInt("JumpCount", jumpCount);
+            spawnerController.normalPlatformSpeed *= 8f;
+        }
+        else if (jumpCount == 3)
+        {
+            jumpForceMultiplier = 1.4f;
+            //jumpCount = 0;
+            PlayerPrefs.SetInt("JumpCount", jumpCount);
+            spawnerController.normalPlatformSpeed *= 10f;
         }
         else
         {
             jumpForceMultiplier = 1.1f;
+            spawnerController.normalPlatformSpeed = 0.2f;
         }
     }
 

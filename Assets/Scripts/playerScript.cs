@@ -18,6 +18,8 @@ public class playerScript : MonoBehaviour
     private int highScore = 0;
     private platformScript standingPlatform;
     public platformSpawnerScript spawnerController;
+    public bool isCoolingPlatformSpeed = false;
+    public float platformSpeedCoolingRate = 3f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -46,9 +48,8 @@ public class playerScript : MonoBehaviour
         {
             rb.linearVelocityX = 0;
         }
-        /*
 
-        float distance = Vector3.Distance(
+        /*float distance = Vector3.Distance(
             platform1.transform.position,
             platform2.transform.position
         );
@@ -59,6 +60,17 @@ public class playerScript : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        // SprintBlocker triggers on contact from any direction.
+        if (collision.gameObject.CompareTag("SprintBlocker"))
+        {
+            if (spawnerController != null)
+            {
+                spawnerController.TriggerPlatformSpeedBoost();
+            }
+
+            return;
+        }
+
         if (!collision.gameObject.CompareTag("Floor") &&
             !collision.gameObject.CompareTag("Platform"))
         {
@@ -73,6 +85,14 @@ public class playerScript : MonoBehaviour
 
             isGrounded = true;
 
+            // Boost when landing on a platform above the target height.
+            if (collision.gameObject.CompareTag("Platform") &&
+                transform.position.y >= 3.0f &&
+                spawnerController != null)
+            {
+                spawnerController.TriggerPlatformSpeedBoost();
+            }
+
             if (collision.gameObject.CompareTag("Platform"))
             {
                 platformScript newPlatform =
@@ -80,7 +100,6 @@ public class playerScript : MonoBehaviour
 
                 if (newPlatform != null)
                 {
-                    // Stop being carried by any previous platform.
                     if (standingPlatform != null &&
                         standingPlatform != newPlatform)
                     {
@@ -94,17 +113,20 @@ public class playerScript : MonoBehaviour
             }
             else
             {
-                // Landing on the floor means the moving platform
-                // should no longer carry the player.
                 StopPlatformCarry();
             }
 
             break;
         }
     }
-
     void OnCollisionExit2D(Collision2D collision)
     {
+
+        if (collision.gameObject.CompareTag("Platform") ||
+    collision.gameObject.CompareTag("Floor"))
+        {
+            isCoolingPlatformSpeed = true;
+        }
         if (collision.gameObject.CompareTag("Floor") ||
             collision.gameObject.CompareTag("Platform"))
         {
@@ -137,6 +159,7 @@ public class playerScript : MonoBehaviour
 
     private void Jump()
     {
+        isCoolingPlatformSpeed = false;
         StopPlatformCarry();
         float usedMultiplier = jumpForceMultiplier;
         isGrounded = false;
@@ -147,29 +170,10 @@ public class playerScript : MonoBehaviour
         );
 
         int jumpCount = Random.Range(1, 3);
-        spawnerController.normalPlatformSpeed = 0.2f; // Reset to default speed before applying new multiplier
+        // Reset to default speed before applying new multiplier
         //jumpCount++;
 
         PlayerPrefs.SetInt("JumpCount", jumpCount);
-
-        if (jumpCount == 2)
-        {
-            jumpForceMultiplier = 1.3f;
-            PlayerPrefs.SetInt("JumpCount", jumpCount);
-            spawnerController.normalPlatformSpeed *= 8f;
-        }
-        else if (jumpCount == 3)
-        {
-            jumpForceMultiplier = 1.4f;
-            //jumpCount = 0;
-            PlayerPrefs.SetInt("JumpCount", jumpCount);
-            spawnerController.normalPlatformSpeed *= 10f;
-        }
-        else
-        {
-            jumpForceMultiplier = 1.1f;
-            spawnerController.normalPlatformSpeed = 0.2f;
-        }
     }
 
 

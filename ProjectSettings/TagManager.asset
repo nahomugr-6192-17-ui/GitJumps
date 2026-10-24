@@ -8,6 +8,7 @@ TagManager:
   - Platform
   - BlockContainer
   - SprintBlocker
+  - Destroyer
   layers:
   - Default
   - TransparentFX

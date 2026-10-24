@@ -15,15 +15,20 @@ public class platformSpawnerScript : MonoBehaviour
     public float basePlatformSpeed = 0.6f;
 
     [Header("Temporary Speed Boost")]
-    public float speedBoostMultiplier = 8f;
-    public float speedBoostDuration = 12f;
+    public float speedBoostMultiplier = 5f;
+    public float speedBoostDuration = 3f;
 
     private float speedBoostTimer = 0f;
     private bool isSpeedBoostActive = false;
 
     private Transform lastSpawnedPlatform;
+    private GameObject lastSpawnedPlatformObject;
+    private int lastSpawnedFrame = -1;
+    private readonly System.Collections.Generic.List<Transform> spawnedPlatforms = new System.Collections.Generic.List<Transform>();
 
     public bool IsSpeedBoostActive => isSpeedBoostActive;
+    public GameObject Destroyer;
+    public Transform firstPlatform;
 
     public float CurrentPlatformSpeed
     {
@@ -119,9 +124,10 @@ public class platformSpawnerScript : MonoBehaviour
         }
     }
 
+
     void Update()
     {
-        // End the temporary speed boost when its timer expires.
+        // Update the temporary speed boost timer.
         if (isSpeedBoostActive)
         {
             speedBoostTimer -= Time.deltaTime;
@@ -133,7 +139,24 @@ public class platformSpawnerScript : MonoBehaviour
             }
         }
 
-        // Check that all required references are assigned.
+        // Destroy containers independently of spawning.
+        if (playerScript == null ||
+    platformPrefab == null ||
+    spawner == null ||
+    playerScript.currentScore < 1)
+        {
+            Debug.LogWarning(
+                "SPAWNING BLOCKED" +
+                " | PlayerScript missing: " + (playerScript == null) +
+                " | Prefab missing: " + (platformPrefab == null) +
+                " | Spawner missing: " + (spawner == null) +
+                " | Score: " +
+                (playerScript != null ? playerScript.currentScore : -1)
+            );
+        }
+        DestroyBlockContainer();
+
+        // Stop only if spawning references are missing.
         if (playerScript == null ||
             platformPrefab == null ||
             spawner == null)
@@ -141,27 +164,45 @@ public class platformSpawnerScript : MonoBehaviour
             return;
         }
 
-        // Start spawning platforms after the player scores.
+        // Start spawning after the player scores.
         if (playerScript.currentScore < 1)
             return;
 
-        // Spawn the first platform.
+        // Spawn if there is no valid last-spawned container.
         if (lastSpawnedPlatform == null)
         {
+            Debug.Log("Last BlockContainer is null. Attempting to spawn a replacement.");
             SpawnPlatform();
             return;
         }
 
-        // Spawn another platform when the required vertical gap is reached.
+        // Spawn another container when the vertical gap is reached.
         float verticalGap =
             spawner.transform.position.y - lastSpawnedPlatform.position.y;
 
         if (verticalGap >= gapBetweenPlatforms)
+        {
             SpawnPlatform();
+        }
     }
+
 
     void SpawnPlatform()
     {
+        Debug.Log("SpawnPlatform() called.");
+
+        if (platformPrefab == null)
+        {
+            Debug.LogError("Spawn failed: platformPrefab is not assigned.");
+            return;
+        }
+
+        if (spawner == null)
+        {
+            Debug.LogError("Spawn failed: spawner is not assigned.");
+            return;
+        }
+
         float randomX = Random.Range(minX, maxX);
 
         Vector3 spawnPosition = new Vector3(
@@ -176,12 +217,48 @@ public class platformSpawnerScript : MonoBehaviour
             Quaternion.identity
         );
 
+        Debug.Log(
+            "Spawned BlockContainer: " + newPlatform.name +
+            " at position " + newPlatform.transform.position
+        );
+
         lastSpawnedPlatform = newPlatform.transform;
+        lastSpawnedPlatformObject = newPlatform;
+        lastSpawnedFrame = Time.frameCount;
+        spawnedPlatforms.Add(newPlatform.transform);
     }
 
     public void TriggerPlatformSpeedBoost()
     {
         isSpeedBoostActive = true;
         speedBoostTimer = speedBoostDuration;
+    }
+
+    private void DestroyBlockContainer()
+    {
+        if (Destroyer == null)
+            return;
+
+        float destroyerY = Destroyer.transform.position.y;
+
+        GameObject[] containers =
+            GameObject.FindGameObjectsWithTag("BlockContainer");
+
+        foreach (GameObject container in containers)
+        {
+            if (container == null)
+                continue;
+
+            // Do not destroy the most recently spawned container.
+            if (container == lastSpawnedPlatformObject)
+                continue;
+
+            // Only destroy containers that have passed below
+            // the Destroyer's Y position.
+            if (container.transform.position.y <= destroyerY)
+            {
+                Destroy(container);
+            }
+        }
     }
 }

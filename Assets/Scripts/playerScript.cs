@@ -19,7 +19,7 @@ public class playerScript : MonoBehaviour
     private platformScript standingPlatform;
     public platformSpawnerScript spawnerController;
     public bool isCoolingPlatformSpeed = false;
-    public float platformSpeedCoolingRate = 3f;
+    public float platformSpeedCoolingRate = 1f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -87,7 +87,7 @@ public class playerScript : MonoBehaviour
 
             // Boost when landing on a platform above the target height.
             if (collision.gameObject.CompareTag("Platform") &&
-                transform.position.y >= 3.0f &&
+                transform.position.y >= 7.0f &&
                 spawnerController != null)
             {
                 spawnerController.TriggerPlatformSpeedBoost();
@@ -153,9 +153,6 @@ public class playerScript : MonoBehaviour
             standingPlatform = null;
         }
     }
-
-
-
 
     private void Jump()
     {

@@ -70,10 +70,11 @@ public class platformScript : MonoBehaviour
             platform.SetActive(false);
         }
 
-        // Choose how many platforms to activate.
-        int activeCount = Random.Range(
-            1,
-            Mathf.Min(numberOfPlatforms, platforms.Count) + 1
+        // Choose how many platforms to activate (Random Probablistic).
+        int activeCount = Mathf.Min(
+            ProbabilisticRandomizer(),
+            numberOfPlatforms,
+            platforms.Count
         );
 
         // Shuffle the list so we don't select the same platform twice.
@@ -146,5 +147,19 @@ public class platformScript : MonoBehaviour
         float speed = spawnerController.CurrentPlatformSpeed;
 
         transform.position += Vector3.down * speed * Time.deltaTime;
+    }
+
+    private int ProbabilisticRandomizer()
+    {
+        float roll = Random.value; // Random value between 0 and 1
+
+        if (roll < 0.40f)
+            return 2; // 40% probability
+        else if (roll < 0.65f)
+            return 1; // 25% probability
+        else if (roll < 0.95f)
+            return 3; // 20% probability
+        else
+            return 4; // 10% probability
     }
 }

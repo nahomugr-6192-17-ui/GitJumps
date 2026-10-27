@@ -79,6 +79,7 @@ public class cameraScript : MonoBehaviour
         if (playerIsFalling)
         {
             targetY = fallCameraY;
+            Destroy(GameObject.FindWithTag("BlockContainer"));
         }
         else if (cameraLocked)
         {

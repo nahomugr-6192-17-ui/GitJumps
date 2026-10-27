@@ -6,8 +6,8 @@ public class platformSpawnerScript : MonoBehaviour
     [Header("Spawning")]
     public float gapBetweenPlatforms = 2.5f;
     public GameObject platformPrefab;
-    public float minX = -1f;
-    public float maxX = 1f;
+    public float minX = -0.5f;
+    public float maxX = 0.5f;
     public GameObject spawner;
     public playerScript playerScript;
 
@@ -16,7 +16,7 @@ public class platformSpawnerScript : MonoBehaviour
 
     [Header("Temporary Speed Boost")]
     public float speedBoostMultiplier = 5f;
-    public float speedBoostDuration = 3f;
+    public float speedBoostDuration = 1.8f;
 
     private float speedBoostTimer = 0f;
     private bool isSpeedBoostActive = false;
@@ -28,7 +28,7 @@ public class platformSpawnerScript : MonoBehaviour
 
     public bool IsSpeedBoostActive => isSpeedBoostActive;
     public GameObject Destroyer;
-    public Transform firstPlatform;
+    public GameObject LandingBlock;
 
     public float CurrentPlatformSpeed
     {
@@ -41,63 +41,37 @@ public class platformSpawnerScript : MonoBehaviour
             float scoreMultiplier = 1f;
 
             if (score >= 150)
-                scoreMultiplier = 5f;
+                scoreMultiplier = 7.2f;
             else if (score >= 140)
-                scoreMultiplier = 4.8f;
+                scoreMultiplier = 7f;
             else if (score >= 130)
-                scoreMultiplier = 4.6f;
+                scoreMultiplier = 6.8f;
             else if (score >= 120)
-                scoreMultiplier = 4.5f;
+                scoreMultiplier = 6.6f;
             else if (score >= 110)
-                scoreMultiplier = 4.2f;
+                scoreMultiplier = 6.4f;
             else if (score >= 105)
-                scoreMultiplier = 4.1f;
+                scoreMultiplier = 6.2f;
             else if (score >= 100)
-                scoreMultiplier = 4f;
+                scoreMultiplier = 6f;
             else if (score >= 90)
-                scoreMultiplier = 3.8f;
+                scoreMultiplier = 5.8f;
             else if (score >= 80)
-                scoreMultiplier = 3.6f;
+                scoreMultiplier = 5.4f;
             else if (score >= 70)
-                scoreMultiplier = 3.4f;
+                scoreMultiplier = 5.2f;
             else if (score >= 65)
-                scoreMultiplier = 3.2f;
+                scoreMultiplier = 5f;
             else if (score >= 60)
-                scoreMultiplier = 3.5f;
+                scoreMultiplier = 4.8f;
             else if (score >= 55)
-                scoreMultiplier = 3.3f;
+                scoreMultiplier = 4.6f;
             else if (score >= 50)
-                scoreMultiplier = 3.1f;
+                scoreMultiplier = 4.2f;
             else if (score >= 40)
-                scoreMultiplier = 2.9f;
-            else if (score >= 30)
-                scoreMultiplier = 2.7f;
-            else if (score >= 20)
-                scoreMultiplier = 2.5f;
-            else if (score >= 10)
-                scoreMultiplier = 2f;
-            else if (score >= 5)
-                scoreMultiplier = 1.5f;
-            else if (score >= 100)
-                scoreMultiplier = 4f;
-            else if (score >= 90)
-                scoreMultiplier = 3.8f;
-            else if (score >= 80)
-                scoreMultiplier = 3.6f;
-            else if (score >= 70)
                 scoreMultiplier = 3.4f;
-            else if (score >= 65)
-                scoreMultiplier = 3.2f;
-            else if (score >= 60)
-                scoreMultiplier = 3.5f;
-            else if (score >= 55)
-                scoreMultiplier = 3.3f;
-            else if (score >= 50)
-                scoreMultiplier = 3.1f;
-            else if (score >= 40)
-                scoreMultiplier = 2.9f;
             else if (score >= 30)
-                scoreMultiplier = 2.7f;
+                scoreMultiplier = 3f;
             else if (score >= 20)
                 scoreMultiplier = 2.5f;
             else if (score >= 10)
@@ -140,20 +114,6 @@ public class platformSpawnerScript : MonoBehaviour
         }
 
         // Destroy containers independently of spawning.
-        if (playerScript == null ||
-    platformPrefab == null ||
-    spawner == null ||
-    playerScript.currentScore < 1)
-        {
-            Debug.LogWarning(
-                "SPAWNING BLOCKED" +
-                " | PlayerScript missing: " + (playerScript == null) +
-                " | Prefab missing: " + (platformPrefab == null) +
-                " | Spawner missing: " + (spawner == null) +
-                " | Score: " +
-                (playerScript != null ? playerScript.currentScore : -1)
-            );
-        }
         DestroyBlockContainer();
 
         // Stop only if spawning references are missing.
@@ -184,12 +144,16 @@ public class platformSpawnerScript : MonoBehaviour
         {
             SpawnPlatform();
         }
+
+        if (LandingBlock != null && LandingBlock.transform.position.y <= -10f)
+        {
+            Destroy(LandingBlock);
+        }
     }
 
 
     void SpawnPlatform()
     {
-        Debug.Log("SpawnPlatform() called.");
 
         if (platformPrefab == null)
         {
@@ -215,11 +179,6 @@ public class platformSpawnerScript : MonoBehaviour
             platformPrefab,
             spawnPosition,
             Quaternion.identity
-        );
-
-        Debug.Log(
-            "Spawned BlockContainer: " + newPlatform.name +
-            " at position " + newPlatform.transform.position
         );
 
         lastSpawnedPlatform = newPlatform.transform;

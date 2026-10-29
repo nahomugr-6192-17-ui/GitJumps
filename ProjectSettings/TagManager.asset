@@ -9,6 +9,8 @@ TagManager:
   - BlockContainer
   - SprintBlocker
   - Destroyer
+  - Bug
+  - Booster
   layers:
   - Default
   - TransparentFX

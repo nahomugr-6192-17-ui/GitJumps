@@ -29,6 +29,8 @@ public class playerScript : MonoBehaviour
     public float jumpCutMultiplier = 0.5f;
 
     private bool jumpWasHeld;
+    public GameObject Booster;
+    public GameObject Bug;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -149,6 +151,26 @@ public class playerScript : MonoBehaviour
 
             break;
         }
+        
+        if (collision.gameObject.CompareTag("Booster"))
+        {
+            if (spawnerController != null)
+            {
+                spawnerController.TriggerPlatformSpeedBoost(
+                    5f,
+                    1f
+                );
+            }
+
+            Destroy(GameObject.FindWithTag("Booster"));
+            return;
+        }
+
+        if (collision.gameObject.CompareTag("Bug"))
+        {
+            Destroy(collision.gameObject);
+            return;
+        }
     }
     void OnCollisionExit2D(Collision2D collision)
     {
@@ -247,7 +269,7 @@ public class playerScript : MonoBehaviour
                 PlayerPrefs.SetInt("Score", currentScore);
                 Debug.Log("Score: " + currentScore);
             }
-            if(currentScore == 3)
+            if (currentScore == 3)
             {
                 if (spawnerController != null)
                 {

@@ -20,6 +20,15 @@ public class playerScript : MonoBehaviour
     public platformSpawnerScript spawnerController;
     public bool isCoolingPlatformSpeed = false;
     public float platformSpeedCoolingRate = 1f;
+    [Header("Movement Smoothing")]
+    public float horizontalAcceleration = 35f;
+    public float horizontalDeceleration = 45f;
+
+    [Header("Jump Control")]
+    [Range(0.1f, 1f)]
+    public float jumpCutMultiplier = 0.5f;
+
+    private bool jumpWasHeld;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -32,28 +41,57 @@ public class playerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if ((Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) && isGrounded == true)
+        if (Keyboard.current == null)
+            return;
+
+        bool leftPressed =
+            Keyboard.current.aKey.isPressed ||
+            Keyboard.current.leftArrowKey.isPressed;
+
+        bool rightPressed =
+            Keyboard.current.dKey.isPressed ||
+            Keyboard.current.rightArrowKey.isPressed;
+
+        bool jumpPressed =
+            Keyboard.current.wKey.isPressed ||
+            Keyboard.current.upArrowKey.isPressed;
+
+        bool jumpHeld =
+            Keyboard.current.wKey.isPressed ||
+            Keyboard.current.upArrowKey.isPressed;
+
+        // Smooth horizontal acceleration and deceleration.
+        float targetSpeed = 0f;
+
+        if (leftPressed && !rightPressed)
+            targetSpeed = -moveSpeed;
+        else if (rightPressed && !leftPressed)
+            targetSpeed = moveSpeed;
+
+        float movementRate = targetSpeed == 0f
+            ? horizontalDeceleration
+            : horizontalAcceleration;
+
+        rb.linearVelocityX = Mathf.MoveTowards(
+            rb.linearVelocityX,
+            targetSpeed,
+            movementRate * Time.deltaTime
+        );
+
+        // Jump once when the jump key is pressed.
+        if (jumpPressed && isGrounded)
         {
             Jump();
         }
-        if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
+
+        // Cut the jump short when the player releases jump
+        // while still moving upward.
+        if (jumpWasHeld && !jumpHeld && rb.linearVelocityY > 0f)
         {
-            rb.linearVelocityX = -moveSpeed;
-        }
-        else if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
-        {
-            rb.linearVelocityX = moveSpeed;
-        }
-        else
-        {
-            rb.linearVelocityX = 0;
+            rb.linearVelocityY *= jumpCutMultiplier;
         }
 
-        /*float distance = Vector3.Distance(
-            platform1.transform.position,
-            platform2.transform.position
-        );
-        Debug.Log("Distance: " + distance);*/
+        jumpWasHeld = jumpHeld;
     }
 
 
@@ -61,16 +99,6 @@ public class playerScript : MonoBehaviour
     void OnCollisionEnter2D(Collision2D collision)
     {
         // SprintBlocker triggers on contact from any direction.
-        if (collision.gameObject.CompareTag("SprintBlocker"))
-        {
-            if (spawnerController != null)
-            {
-                spawnerController.TriggerPlatformSpeedBoost();
-            }
-
-            return;
-        }
-
         if (!collision.gameObject.CompareTag("Floor") &&
             !collision.gameObject.CompareTag("Platform"))
         {
@@ -87,10 +115,13 @@ public class playerScript : MonoBehaviour
 
             // Boost when landing on a platform above the target height.
             if (collision.gameObject.CompareTag("Platform") &&
-                transform.position.y >= 7.0f &&
-                spawnerController != null)
+                transform.position.y >= 5.6f &&
+                spawnerController != null && !isCoolingPlatformSpeed)
             {
-                spawnerController.TriggerPlatformSpeedBoost();
+                spawnerController.TriggerPlatformSpeedBoost(
+                    5f,
+                    0.85f
+                );
             }
 
             if (collision.gameObject.CompareTag("Platform"))
@@ -166,10 +197,36 @@ public class playerScript : MonoBehaviour
             ForceMode2D.Impulse
         );
 
-        int jumpCount = Random.Range(1, 3);
+        float probabilisticJumpCount = Random.value;
+        int jumpCount = PlayerPrefs.GetInt("JumpCount", 0);
+
+        if (probabilisticJumpCount < 0.45)
+        {
+            jumpCount = 1;
+        }
+        else if (probabilisticJumpCount < 0.8)
+        {
+            jumpCount = 2;
+        }
+        else
+        {
+            jumpCount = 3;
+        }
+
+        spawnerController.speedBoostDuration = 1.8f;
         // Reset to default speed before applying new multiplier
         //jumpCount++;
 
+        if (spawnerController != null)
+        {
+            if (jumpCount == 3)
+            {
+                spawnerController.TriggerPlatformSpeedBoost(
+                    5f,
+                    0.5f
+                );
+            }
+        }
         PlayerPrefs.SetInt("JumpCount", jumpCount);
     }
 
@@ -190,6 +247,29 @@ public class playerScript : MonoBehaviour
                 PlayerPrefs.SetInt("Score", currentScore);
                 Debug.Log("Score: " + currentScore);
             }
+            if(currentScore == 3)
+            {
+                if (spawnerController != null)
+                {
+                    spawnerController.TriggerPlatformSpeedBoost(
+                        5f,
+                        0.85f
+                    );
+                }
+            }
+        }
+
+        if (collision.gameObject.CompareTag("SprintBlocker"))
+        {
+            if (spawnerController != null)
+            {
+                spawnerController.TriggerPlatformSpeedBoost(
+                    5f,
+                    0.85f
+                );
+            }
+
+            return;
         }
     }
 

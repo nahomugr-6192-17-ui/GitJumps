@@ -153,11 +153,11 @@ public class platformScript : MonoBehaviour
     {
         float roll = Random.value; // Random value between 0 and 1
 
-        if (roll < 0.40f)
-            return 2; // 40% probability
-        else if (roll < 0.65f)
-            return 1; // 25% probability
-        else if (roll < 0.95f)
+        if (roll < 0.60f)
+            return 1; // 40% probability
+        else if (roll < 0.80f)
+            return 2; // 25% probability
+        else if (roll < 0.98f)
             return 3; // 20% probability
         else
             return 4; // 10% probability

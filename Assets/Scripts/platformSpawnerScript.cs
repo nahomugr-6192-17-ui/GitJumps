@@ -16,7 +16,10 @@ public class platformSpawnerScript : MonoBehaviour
 
     [Header("Temporary Speed Boost")]
     public float speedBoostMultiplier = 5f;
-    public float speedBoostDuration = 1.8f;
+    public float speedBoostDuration = 0.001f;
+
+    public float platformSpeedCoolingRate = 1f;
+    private float activeSpeedBoostMultiplier = 1f;
 
     private float speedBoostTimer = 0f;
     private bool isSpeedBoostActive = false;
@@ -80,7 +83,7 @@ public class platformSpawnerScript : MonoBehaviour
                 scoreMultiplier = 1.5f;
 
             float boostMultiplier = isSpeedBoostActive
-                ? speedBoostMultiplier
+                ? activeSpeedBoostMultiplier
                 : 1f;
 
             return basePlatformSpeed * scoreMultiplier * boostMultiplier;
@@ -187,10 +190,18 @@ public class platformSpawnerScript : MonoBehaviour
         spawnedPlatforms.Add(newPlatform.transform);
     }
 
-    public void TriggerPlatformSpeedBoost()
+    public void TriggerPlatformSpeedBoost(
+        float multiplier,
+        float duration)
     {
-        isSpeedBoostActive = true;
-        speedBoostTimer = speedBoostDuration;
+        activeSpeedBoostMultiplier = multiplier;
+        speedBoostTimer = duration;
+        isSpeedBoostActive = duration > 0f;
+
+        if (!isSpeedBoostActive)
+        {
+            activeSpeedBoostMultiplier = 1f;
+        }
     }
 
     private void DestroyBlockContainer()

@@ -151,26 +151,6 @@ public class playerScript : MonoBehaviour
 
             break;
         }
-        
-        if (collision.gameObject.CompareTag("Booster"))
-        {
-            if (spawnerController != null)
-            {
-                spawnerController.TriggerPlatformSpeedBoost(
-                    5f,
-                    1f
-                );
-            }
-
-            Destroy(GameObject.FindWithTag("Booster"));
-            return;
-        }
-
-        if (collision.gameObject.CompareTag("Bug"))
-        {
-            Destroy(collision.gameObject);
-            return;
-        }
     }
     void OnCollisionExit2D(Collision2D collision)
     {
@@ -293,6 +273,16 @@ public class playerScript : MonoBehaviour
 
             return;
         }
-    }
 
+        /*if (collision.gameObject.CompareTag("Booster"))
+        {
+            Debug.Log("Booster activated!");
+        }*/
+
+        if (collision.gameObject.CompareTag("Bug"))
+        {
+            Debug.Log("Bug activated!");
+            Destroy(gameObject);
+        }
+    }
 }

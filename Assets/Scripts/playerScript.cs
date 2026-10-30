@@ -40,6 +40,16 @@ public class playerScript : MonoBehaviour
     public bool isCommitTriggered = false;
     public bool isBugTriggered = false;
     public ParticleSystem commitParticleEffect;
+    private Coroutine commitParticleCoroutine;
+
+    [Header("Bug Hit Effect")]
+    public float bugFlashDuration = 0.5f;
+    public float bugFlashInterval = 0.08f;
+
+    private SpriteRenderer playerSprite;
+    private Coroutine bugFlashCoroutine;
+
+    private bool isGameOver = false;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -48,6 +58,7 @@ public class playerScript : MonoBehaviour
         currentScore = 0;
         spawnerController = FindAnyObjectByType<platformSpawnerScript>();
         defaultJumpForceMultiplier = jumpForceMultiplier;
+        playerSprite = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -287,18 +298,29 @@ public class playerScript : MonoBehaviour
         {
             isCommitTriggered = true;
             Debug.Log("Commit activated!");
+
             ActivateCommitBoost();
+
+            // Start the particle trail.
             if (commitParticleEffect != null)
             {
-                commitParticleEffect.Play();
+                if (commitParticleCoroutine != null)
+                {
+                    StopCoroutine(commitParticleCoroutine);
+                }
+
+                commitParticleCoroutine =
+                    StartCoroutine(CommitParticleTrail());
             }
-            Destroy(collision.gameObject);
+
+            //Destroy(collision.gameObject);
         }
 
         if (collision.gameObject.CompareTag("Bug"))
         {
             isBugTriggered = true;
             BugCollision();
+            isGameOver = true;
         }
     }
 
@@ -348,9 +370,73 @@ public class playerScript : MonoBehaviour
         commitBoostCoroutine = null;
     }
 
+    private System.Collections.IEnumerator CommitParticleTrail()
+    {
+        // Clear any previous particles.
+        commitParticleEffect.Stop(
+            false,
+            ParticleSystemStopBehavior.StopEmittingAndClear
+        );
+
+        // Start emitting particles.
+        commitParticleEffect.Play();
+
+        // Keep emitting while the player is moving upward.
+        while (rb.linearVelocityY > 0f)
+        {
+            yield return null;
+        }
+
+        // Stop emitting, but allow existing particles to disappear naturally.
+        commitParticleEffect.Stop(
+            false,
+            ParticleSystemStopBehavior.StopEmitting
+        );
+
+        commitParticleCoroutine = null;
+    }
+
+
+
     void BugCollision()
     {
-        // Handle the bug collision logic here
-        rb.GetComponent<SpriteRenderer>().color = Color.red; // Change color to red
+        if (bugFlashCoroutine != null)
+        {
+            StopCoroutine(bugFlashCoroutine);
+        }
+
+        bugFlashCoroutine = StartCoroutine(BugFlashEffect());
+    }
+
+    private System.Collections.IEnumerator BugFlashEffect()
+    {
+        float elapsedTime = 0f;
+
+        Color originalColor = playerSprite.color;
+
+        while (elapsedTime < bugFlashDuration)
+        {
+            playerSprite.color = Color.red;
+
+            yield return new WaitForSeconds(bugFlashInterval);
+
+            playerSprite.color = originalColor;
+
+            yield return new WaitForSeconds(bugFlashInterval);
+
+            elapsedTime += bugFlashInterval * 2f;
+        }
+
+        playerSprite.color = originalColor;
+
+        bugFlashCoroutine = null;
+    }
+
+    void GameOver()
+    {
+        if (isGameOver == true)
+        {
+            
+        }
     }
 }

@@ -30,8 +30,8 @@ public class playerScript : MonoBehaviour
 
     private bool jumpWasHeld;
     [Header("Commit Boost")]
-    public float commitJumpMultiplier = 1.5f;
-    public float commitBoostDuration = 3f;
+    public float commitJumpMultiplier = 1.4f;
+    public float commitBoostDuration = 0.95f;
 
     private float defaultJumpForceMultiplier;
     private Coroutine commitBoostCoroutine;
@@ -39,6 +39,7 @@ public class playerScript : MonoBehaviour
     public GameObject Bug;
     public bool isCommitTriggered = false;
     public bool isBugTriggered = false;
+    public ParticleSystem commitParticleEffect;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -131,7 +132,7 @@ public class playerScript : MonoBehaviour
             {
                 spawnerController.TriggerPlatformSpeedBoost(
                     5f,
-                    0.85f
+                    0.5f
                 );
             }
 
@@ -234,16 +235,16 @@ public class playerScript : MonoBehaviour
             if (jumpCount == 3)
             {
                 spawnerController.TriggerPlatformSpeedBoost(
-                    5f,
-                    0.5f
+                    4f,
+                    0.45f
                 );
             }
 
-            if (currentScore <= 30)
+            if (currentScore <= 20 && currentScore >= 3)
             {
                 spawnerController.TriggerPlatformSpeedBoost(
-                    5f,
-                    0.65f
+                    4f,
+                    0.5f
                 );
             }
         }
@@ -287,20 +288,24 @@ public class playerScript : MonoBehaviour
             isCommitTriggered = true;
             Debug.Log("Commit activated!");
             ActivateCommitBoost();
+            if (commitParticleEffect != null)
+            {
+                commitParticleEffect.Play();
+            }
             Destroy(collision.gameObject);
         }
 
         if (collision.gameObject.CompareTag("Bug"))
         {
             isBugTriggered = true;
-            Debug.Log("Bug activated!");
-            Destroy(gameObject);
+            BugCollision();
         }
     }
 
     private void ActivateCommitBoost()
     {
         // Stop an existing Commit boost timer, if there is one.
+        isCoolingPlatformSpeed = true;
         if (commitBoostCoroutine != null)
         {
             StopCoroutine(commitBoostCoroutine);
@@ -341,5 +346,11 @@ public class playerScript : MonoBehaviour
         jumpForceMultiplier = defaultJumpForceMultiplier;
 
         commitBoostCoroutine = null;
+    }
+
+    void BugCollision()
+    {
+        // Handle the bug collision logic here
+        rb.GetComponent<SpriteRenderer>().color = Color.red; // Change color to red
     }
 }

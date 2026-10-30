@@ -23,6 +23,11 @@ public class platformScript : MonoBehaviour
     public playerScript playerScript;
     public platformSpawnerScript spawnerController;
 
+    public void ScrollDown(float amount)
+    {
+        transform.position += Vector3.down * amount;
+    }
+
     void Start()
     {
         NumOfPlatforms();

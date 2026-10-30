@@ -11,6 +11,7 @@ TagManager:
   - Destroyer
   - Bug
   - Booster
+  - Commit
   layers:
   - Default
   - TransparentFX

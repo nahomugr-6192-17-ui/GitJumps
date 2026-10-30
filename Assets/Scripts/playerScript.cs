@@ -29,8 +29,16 @@ public class playerScript : MonoBehaviour
     public float jumpCutMultiplier = 0.5f;
 
     private bool jumpWasHeld;
-    public GameObject Booster;
+    [Header("Commit Boost")]
+    public float commitJumpMultiplier = 1.5f;
+    public float commitBoostDuration = 3f;
+
+    private float defaultJumpForceMultiplier;
+    private Coroutine commitBoostCoroutine;
+    public GameObject Commit;
     public GameObject Bug;
+    public bool isCommitTriggered = false;
+    public bool isBugTriggered = false;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -38,6 +46,7 @@ public class playerScript : MonoBehaviour
         camera = GameObject.Find("Main Camera");
         currentScore = 0;
         spawnerController = FindAnyObjectByType<platformSpawnerScript>();
+        defaultJumpForceMultiplier = jumpForceMultiplier;
     }
 
     // Update is called once per frame
@@ -117,7 +126,7 @@ public class playerScript : MonoBehaviour
 
             // Boost when landing on a platform above the target height.
             if (collision.gameObject.CompareTag("Platform") &&
-                transform.position.y >= 5.6f &&
+                transform.position.y >= 4.6f &&
                 spawnerController != null && !isCoolingPlatformSpeed)
             {
                 spawnerController.TriggerPlatformSpeedBoost(
@@ -190,6 +199,7 @@ public class playerScript : MonoBehaviour
     private void Jump()
     {
         isCoolingPlatformSpeed = false;
+        isCommitTriggered = false;
         StopPlatformCarry();
         float usedMultiplier = jumpForceMultiplier;
         isGrounded = false;
@@ -228,6 +238,14 @@ public class playerScript : MonoBehaviour
                     0.5f
                 );
             }
+
+            if (currentScore <= 30)
+            {
+                spawnerController.TriggerPlatformSpeedBoost(
+                    5f,
+                    0.65f
+                );
+            }
         }
         PlayerPrefs.SetInt("JumpCount", jumpCount);
     }
@@ -249,16 +267,6 @@ public class playerScript : MonoBehaviour
                 PlayerPrefs.SetInt("Score", currentScore);
                 Debug.Log("Score: " + currentScore);
             }
-            if (currentScore == 3)
-            {
-                if (spawnerController != null)
-                {
-                    spawnerController.TriggerPlatformSpeedBoost(
-                        5f,
-                        0.85f
-                    );
-                }
-            }
         }
 
         if (collision.gameObject.CompareTag("SprintBlocker"))
@@ -267,22 +275,71 @@ public class playerScript : MonoBehaviour
             {
                 spawnerController.TriggerPlatformSpeedBoost(
                     5f,
-                    0.85f
+                    0.65f
                 );
             }
 
             return;
         }
 
-        /*if (collision.gameObject.CompareTag("Booster"))
+        if (collision.gameObject.CompareTag("Commit"))
         {
-            Debug.Log("Booster activated!");
-        }*/
+            isCommitTriggered = true;
+            Debug.Log("Commit activated!");
+            ActivateCommitBoost();
+            Destroy(collision.gameObject);
+        }
 
         if (collision.gameObject.CompareTag("Bug"))
         {
+            isBugTriggered = true;
             Debug.Log("Bug activated!");
             Destroy(gameObject);
         }
+    }
+
+    private void ActivateCommitBoost()
+    {
+        // Stop an existing Commit boost timer, if there is one.
+        if (commitBoostCoroutine != null)
+        {
+            StopCoroutine(commitBoostCoroutine);
+        }
+
+        // Apply the stronger jump multiplier.
+        jumpForceMultiplier =
+            defaultJumpForceMultiplier * commitJumpMultiplier;
+
+        // Immediately launch the player upward.
+        isGrounded = false;
+        StopPlatformCarry();
+
+        rb.linearVelocityY = 0f;
+
+        rb.AddForce(
+            Vector2.up * jumpForce * jumpForceMultiplier,
+            ForceMode2D.Impulse
+        );
+
+        // Increase platform speed for 1 second.
+        if (spawnerController != null)
+        {
+            spawnerController.TriggerPlatformSpeedBoost(
+                8f,
+                commitBoostDuration
+            );
+        }
+
+        // Start the timer to restore the jump multiplier.
+        commitBoostCoroutine = StartCoroutine(ResetCommitBoost());
+    }
+
+    private System.Collections.IEnumerator ResetCommitBoost()
+    {
+        yield return new WaitForSeconds(commitBoostDuration);
+
+        jumpForceMultiplier = defaultJumpForceMultiplier;
+
+        commitBoostCoroutine = null;
     }
 }

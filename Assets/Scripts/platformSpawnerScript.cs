@@ -231,4 +231,40 @@ public class platformSpawnerScript : MonoBehaviour
             }
         }
     }
+
+    public void ScrollWorldDown(float amount)
+    {
+        if (amount <= 0f)
+            return;
+
+        GameObject[] containers =
+            GameObject.FindGameObjectsWithTag("BlockContainer");
+
+        foreach (GameObject container in containers)
+        {
+            if (container == null)
+                continue;
+
+            platformScript containerScript =
+                container.GetComponent<platformScript>();
+
+            if (containerScript != null)
+            {
+                containerScript.ScrollDown(amount);
+            }
+            else
+            {
+                container.transform.position +=
+                    Vector3.down * amount;
+            }
+        }
+
+        // Move the spawner so new containers continue appearing
+        // above the visible gameplay area.
+        if (spawner != null)
+        {
+            spawner.transform.position +=
+                Vector3.down * amount;
+        }
+    }
 }

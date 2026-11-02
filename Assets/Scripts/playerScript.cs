@@ -126,6 +126,12 @@ public class playerScript : MonoBehaviour
 
             jumpWasHeld = jumpHeld;
         }
+
+        /*float distanceBetweenBoosters = Mathf.Abs(
+            platform1.transform.position.y - platform2.transform.position.y
+        );
+        Debug.Log("Distance between boosters: " + distanceBetweenBoosters);
+        */
         GameOver();
         UpdateGameOverTrigger();
     }
@@ -264,7 +270,7 @@ public class playerScript : MonoBehaviour
                 );
             }
 
-            if (currentScore <= 20 && currentScore >= 3)
+            if (currentScore <= 50 && currentScore >= 3)
             {
                 spawnerController.TriggerPlatformSpeedBoost(
                     4f,

@@ -11,6 +11,18 @@ public class platformSpawnerScript : MonoBehaviour
     public GameObject spawner;
     public playerScript playerScript;
 
+    [Header("PowerUp Spawning")]
+    public GameObject powerUpsPrefab;
+
+    public float powerUpMinX = -5f;
+    public float powerUpMaxX = 5f;
+
+    public float minPowerUpGap = 7f;
+    public float maxPowerUpGap = 13f;
+
+    private float powerUpDistanceTravelled = 0f;
+    private float nextPowerUpGap;
+
     [Header("Platform Speed")]
     public float basePlatformSpeed = 0.6f;
 
@@ -99,6 +111,7 @@ public class platformSpawnerScript : MonoBehaviour
             if (playerObject != null)
                 playerScript = playerObject.GetComponent<playerScript>();
         }
+        nextPowerUpGap = Random.Range(minPowerUpGap, maxPowerUpGap);
     }
 
 
@@ -131,6 +144,23 @@ public class platformSpawnerScript : MonoBehaviour
         if (playerScript.currentScore < 1)
             return;
 
+        // Track how far the scrolling world has moved.
+        powerUpDistanceTravelled +=
+            CurrentPlatformSpeed * Time.deltaTime;
+
+        // Spawn a PowerUp after the randomized distance.
+        if (powerUpDistanceTravelled >= nextPowerUpGap)
+        {
+            SpawnPowerUp();
+
+            powerUpDistanceTravelled = 0f;
+
+            nextPowerUpGap = Random.Range(
+                minPowerUpGap,
+                maxPowerUpGap
+            );
+        }
+
         // Spawn if there is no valid last-spawned container.
         if (lastSpawnedPlatform == null)
         {
@@ -157,16 +187,11 @@ public class platformSpawnerScript : MonoBehaviour
 
     void SpawnPlatform()
     {
-
         if (platformPrefab == null)
-        {
             return;
-        }
 
         if (spawner == null)
-        {
             return;
-        }
 
         float randomX = Random.Range(minX, maxX);
 
@@ -186,6 +211,59 @@ public class platformSpawnerScript : MonoBehaviour
         lastSpawnedPlatformObject = newPlatform;
         lastSpawnedFrame = Time.frameCount;
         spawnedPlatforms.Add(newPlatform.transform);
+    }
+
+    private void SpawnPowerUp()
+    {
+        if (powerUpsPrefab == null || spawner == null)
+            return;
+
+        float randomX = Random.Range(
+            powerUpMinX,
+            powerUpMaxX
+        );
+
+        Vector3 spawnPosition = new Vector3(
+            randomX,
+            spawner.transform.position.y,
+            0f
+        );
+
+        GameObject newPowerUp = Instantiate(
+            powerUpsPrefab,
+            spawnPosition,
+            Quaternion.identity
+        );
+
+        Transform booster = newPowerUp.transform.Find("Booster");
+        Transform bug = newPowerUp.transform.Find("Bug");
+
+        if (booster == null || bug == null)
+        {
+            Debug.LogError(
+                "PowerUps prefab must contain children named Booster and Bug."
+            );
+
+            Destroy(newPowerUp);
+            return;
+        }
+
+        int selectedPowerUp = BoosterSpawnerRandomizer();
+
+        if (selectedPowerUp == 2)
+        {
+            booster.gameObject.SetActive(true);
+            bug.gameObject.SetActive(false);
+        }
+        else
+        {
+            booster.gameObject.SetActive(false);
+            bug.gameObject.SetActive(true);
+        }
+
+        Debug.Log(selectedPowerUp == 2
+            ? "Booster spawned!"
+            : "Bug spawned!");
     }
 
     public void TriggerPlatformSpeedBoost(
@@ -281,15 +359,5 @@ public class platformSpawnerScript : MonoBehaviour
         }
 
         return assignedValue;
-    }
-
-    void BoosterSpawner()
-    {
-        if (spawner == null)
-        {
-            return;
-        }
-
-        float randomX = Random.Range(-5, 5);
     }
 }

@@ -277,6 +277,11 @@ public class playerScript : MonoBehaviour
                     0.5f
                 );
             }
+
+            if (currentScore >= 1)
+            {
+                jumpForce = 7f;
+            }
         }
         PlayerPrefs.SetInt("JumpCount", jumpCount);
     }

@@ -43,7 +43,7 @@ public class cameraScript : MonoBehaviour
         if (player == null)
             return;
 
-        // --------------------------------
+        // --------------------------------z
         // STATE 1: Normal camera movement
         // --------------------------------
         if (!cameraLocked)

@@ -4,7 +4,6 @@ public class powerUpsMovementScript : MonoBehaviour
 {
     public platformSpawnerScript spawnerController;
     public playerScript playerScript;
-    public float destroyY = -12f;
 
     void Start()
     {
@@ -37,10 +36,5 @@ public class powerUpsMovementScript : MonoBehaviour
 
         transform.position +=
             Vector3.down * speed * Time.deltaTime;
-
-        if (transform.position.y <= destroyY)
-        {
-            Destroy(gameObject);
-        }
     }
 }

@@ -18,9 +18,9 @@ public class platformSpawnerScript : MonoBehaviour
     public float powerUpMaxX = 5f;
 
     public float minPowerUpGap = 7f;
-    public float maxPowerUpGap = 13f;
+    public float maxPowerUpGap = 10f;
 
-    private float powerUpDistanceTravelled = 0f;
+    private Transform lastSpawnedPowerUp;
     private float nextPowerUpGap;
 
     [Header("Platform Speed")]
@@ -126,59 +126,68 @@ public class platformSpawnerScript : MonoBehaviour
             {
                 speedBoostTimer = 0f;
                 isSpeedBoostActive = false;
+                activeSpeedBoostMultiplier = 1f;
             }
         }
 
         // Destroy containers independently of spawning.
         DestroyBlockContainer();
 
-        // Stop only if spawning references are missing.
-        if (playerScript == null ||
-            platformPrefab == null ||
-            spawner == null)
-        {
+        if (playerScript == null)
             return;
-        }
 
-        // Start spawning after the player scores.
+        // Start both spawning systems after the player scores.
         if (playerScript.currentScore < 1)
             return;
 
-        // Track how far the scrolling world has moved.
-        powerUpDistanceTravelled +=
-            CurrentPlatformSpeed * Time.deltaTime;
+        // --------------------------------
+        // POWERUP SPAWNING
+        // --------------------------------
 
-        // Spawn a PowerUp after the randomized distance.
-        if (powerUpDistanceTravelled >= nextPowerUpGap)
+        // Spawn the first PowerUp.
+        if (lastSpawnedPowerUp == null)
         {
             SpawnPowerUp();
+        }
+        else
+        {
+            // Measure the distance between the spawner
+            // and the latest spawned PowerUp.
+            float powerUpGap =
+                spawner.transform.position.y -
+                lastSpawnedPowerUp.position.y;
 
-            powerUpDistanceTravelled = 0f;
-
-            nextPowerUpGap = Random.Range(
-                minPowerUpGap,
-                maxPowerUpGap
-            );
+            // Spawn another PowerUp when the randomized gap is reached.
+            if (powerUpGap >= nextPowerUpGap)
+            {
+                SpawnPowerUp();
+            }
         }
 
-        // Spawn if there is no valid last-spawned container.
+        // --------------------------------
+        // PLATFORM SPAWNING
+        // --------------------------------
+
+        if (platformPrefab == null || spawner == null)
+            return;
+
         if (lastSpawnedPlatform == null)
         {
-            Debug.Log("Last BlockContainer is null. Attempting to spawn a replacement.");
             SpawnPlatform();
             return;
         }
 
-        // Spawn another container when the vertical gap is reached.
         float verticalGap =
-            spawner.transform.position.y - lastSpawnedPlatform.position.y;
+            spawner.transform.position.y -
+            lastSpawnedPlatform.position.y;
 
         if (verticalGap >= gapBetweenPlatforms)
         {
             SpawnPlatform();
         }
 
-        if (LandingBlock != null && LandingBlock.transform.position.y <= -10f)
+        if (LandingBlock != null &&
+            LandingBlock.transform.position.y <= -10f)
         {
             Destroy(LandingBlock);
         }
@@ -197,7 +206,7 @@ public class platformSpawnerScript : MonoBehaviour
 
         Vector3 spawnPosition = new Vector3(
             randomX,
-            spawner.transform.position.y,
+            transform.position.y,
             0f
         );
 
@@ -248,6 +257,8 @@ public class platformSpawnerScript : MonoBehaviour
             return;
         }
 
+        lastSpawnedPowerUp = newPowerUp.transform;
+
         int selectedPowerUp = BoosterSpawnerRandomizer();
 
         if (selectedPowerUp == 2)
@@ -264,6 +275,12 @@ public class platformSpawnerScript : MonoBehaviour
         Debug.Log(selectedPowerUp == 2
             ? "Booster spawned!"
             : "Bug spawned!");
+
+        // Generate the distance required for the next PowerUp.
+        nextPowerUpGap = Random.Range(
+            minPowerUpGap,
+            maxPowerUpGap
+        );
     }
 
     public void TriggerPlatformSpeedBoost(

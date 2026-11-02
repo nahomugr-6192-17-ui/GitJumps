@@ -190,7 +190,7 @@ GameObject:
   - component: {fileID: 6442892758487758030}
   m_Layer: 0
   m_Name: PowerUps
-  m_TagString: Untagged
+  m_TagString: PowerUps
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -226,7 +226,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   spawnerController: {fileID: 0}
   playerScript: {fileID: 0}
-  destroyY: -12
 --- !u!1 &6319637249948448487
 GameObject:
   m_ObjectHideFlags: 0

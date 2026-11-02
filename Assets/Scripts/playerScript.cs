@@ -9,6 +9,7 @@ public class playerScript : MonoBehaviour
     public float jumpForceMultiplier = 1.1f;
     public float moveSpeed = 7f;
     public bool isGrounded = false;
+    private bool buttonsEnabled = true;
     public GameObject ground;
     private GameObject camera;
     /*public GameObject platform1;
@@ -49,7 +50,13 @@ public class playerScript : MonoBehaviour
     private SpriteRenderer playerSprite;
     private Coroutine bugFlashCoroutine;
 
-    private bool isGameOver = false;
+    private float gapBetweenBoosters = 10f;
+
+    public bool isGameOver = false;
+    [Header("Game Over")]
+    public float gameOverTriggerY = -30f;
+    private bool gameOverTriggerEnabled = false;
+    private Collider2D playerCollider;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -59,6 +66,7 @@ public class playerScript : MonoBehaviour
         spawnerController = FindAnyObjectByType<platformSpawnerScript>();
         defaultJumpForceMultiplier = jumpForceMultiplier;
         playerSprite = GetComponent<SpriteRenderer>();
+        playerCollider = GetComponent<Collider2D>();
     }
 
     // Update is called once per frame
@@ -66,55 +74,60 @@ public class playerScript : MonoBehaviour
     {
         if (Keyboard.current == null)
             return;
-
-        bool leftPressed =
-            Keyboard.current.aKey.isPressed ||
-            Keyboard.current.leftArrowKey.isPressed;
-
-        bool rightPressed =
-            Keyboard.current.dKey.isPressed ||
-            Keyboard.current.rightArrowKey.isPressed;
-
-        bool jumpPressed =
-            Keyboard.current.wKey.isPressed ||
-            Keyboard.current.upArrowKey.isPressed;
-
-        bool jumpHeld =
-            Keyboard.current.wKey.isPressed ||
-            Keyboard.current.upArrowKey.isPressed;
-
-        // Smooth horizontal acceleration and deceleration.
-        float targetSpeed = 0f;
-
-        if (leftPressed && !rightPressed)
-            targetSpeed = -moveSpeed;
-        else if (rightPressed && !leftPressed)
-            targetSpeed = moveSpeed;
-
-        float movementRate = targetSpeed == 0f
-            ? horizontalDeceleration
-            : horizontalAcceleration;
-
-        rb.linearVelocityX = Mathf.MoveTowards(
-            rb.linearVelocityX,
-            targetSpeed,
-            movementRate * Time.deltaTime
-        );
-
-        // Jump once when the jump key is pressed.
-        if (jumpPressed && isGrounded)
+        if (buttonsEnabled == true && !isGameOver)
         {
-            Jump();
-        }
+            bool leftPressed =
+                Keyboard.current.aKey.isPressed ||
+                Keyboard.current.leftArrowKey.isPressed;
 
-        // Cut the jump short when the player releases jump
-        // while still moving upward.
-        if (jumpWasHeld && !jumpHeld && rb.linearVelocityY > 0f)
-        {
-            rb.linearVelocityY *= jumpCutMultiplier;
-        }
+            bool rightPressed =
+                Keyboard.current.dKey.isPressed ||
+                Keyboard.current.rightArrowKey.isPressed;
 
-        jumpWasHeld = jumpHeld;
+            bool jumpPressed =
+                Keyboard.current.wKey.isPressed ||
+                Keyboard.current.upArrowKey.isPressed;
+
+            bool jumpHeld =
+                Keyboard.current.wKey.isPressed ||
+                Keyboard.current.upArrowKey.isPressed;
+
+            // Smooth horizontal acceleration and deceleration.
+            float targetSpeed = 0f;
+
+            if (leftPressed && !rightPressed)
+                targetSpeed = -moveSpeed;
+            else if (rightPressed && !leftPressed)
+                targetSpeed = moveSpeed;
+
+            float movementRate = targetSpeed == 0f
+                ? horizontalDeceleration
+                : horizontalAcceleration;
+
+            rb.linearVelocityX = Mathf.MoveTowards(
+                rb.linearVelocityX,
+                targetSpeed,
+                movementRate * Time.deltaTime
+            );
+
+
+            // Jump once when the jump key is pressed.
+            if (jumpPressed && isGrounded)
+            {
+                Jump();
+            }
+
+            // Cut the jump short when the player releases jump
+            // while still moving upward.
+            if (jumpWasHeld && !jumpHeld && rb.linearVelocityY > 0f)
+            {
+                rb.linearVelocityY *= jumpCutMultiplier;
+            }
+
+            jumpWasHeld = jumpHeld;
+        }
+        GameOver();
+        UpdateGameOverTrigger();
     }
 
 
@@ -432,11 +445,35 @@ public class playerScript : MonoBehaviour
         bugFlashCoroutine = null;
     }
 
+    void UpdateGameOverTrigger()
+    {
+        if (!isGameOver || playerCollider == null)
+            return;
+
+        // Enable trigger mode when Game Over begins.
+        if (!gameOverTriggerEnabled)
+        {
+            playerCollider.isTrigger = true;
+            gameOverTriggerEnabled = true;
+        }
+
+        // Restore physical collision when the player reaches Y = -30.
+        if (transform.position.y <= gameOverTriggerY)
+        {
+            playerCollider.isTrigger = false;
+            gameOverTriggerEnabled = false;
+        }
+    }
+
     void GameOver()
     {
-        if (isGameOver == true)
+        if (!isGameOver)
+            return;
+
+        if (spawnerController != null)
         {
-            
+            spawnerController.basePlatformSpeed = 0f;
+            buttonsEnabled = false;
         }
     }
 }

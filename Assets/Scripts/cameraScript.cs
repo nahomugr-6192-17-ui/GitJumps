@@ -7,9 +7,9 @@ public class cameraScript : MonoBehaviour
 
     [Header("Camera Positions")]
     public float gameplayCameraY = 1.4f;
-    public float fallCameraY = -14.5f;
+    public float fallCameraY = -30f;
     public float initialCameraY = 0f;
-    public float fallGroundY = -24f;
+    public float fallGroundY = -40f;
 
     [Header("Player Detection")]
     public float playerFallY = -8.57f;
@@ -19,6 +19,8 @@ public class cameraScript : MonoBehaviour
 
     private Rigidbody2D playerRb;
     private Collider2D playerCol;
+    private playerScript playerScript;
+    private platformSpawnerScript spawnerScript;
 
     private bool cameraLocked = false;
     private bool playerIsFalling = false;
@@ -56,6 +58,11 @@ public class cameraScript : MonoBehaviour
                     fallGroundY,
                     ground.transform.position.z
                 );
+                ground.transform.localScale = new Vector3(
+                    36f,
+                    ground.transform.localScale.y,
+                    ground.transform.localScale.z
+                );
             }
         }
 
@@ -79,7 +86,8 @@ public class cameraScript : MonoBehaviour
         if (playerIsFalling)
         {
             targetY = fallCameraY;
-            Destroy(GameObject.FindWithTag("BlockContainer"));
+            playerScript = player.GetComponent<playerScript>();
+            playerScript.isGameOver = true;
         }
         else if (cameraLocked)
         {

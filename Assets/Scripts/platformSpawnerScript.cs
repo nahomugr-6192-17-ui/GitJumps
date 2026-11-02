@@ -160,13 +160,11 @@ public class platformSpawnerScript : MonoBehaviour
 
         if (platformPrefab == null)
         {
-            Debug.LogError("Spawn failed: platformPrefab is not assigned.");
             return;
         }
 
         if (spawner == null)
         {
-            Debug.LogError("Spawn failed: spawner is not assigned.");
             return;
         }
 
@@ -266,5 +264,32 @@ public class platformSpawnerScript : MonoBehaviour
             spawner.transform.position +=
                 Vector3.down * amount;
         }
+    }
+
+    int BoosterSpawnerRandomizer()
+    {
+        float roll = Random.value;
+        int assignedValue = 0;
+
+        if (roll <= 0.8)
+        {
+            assignedValue = 2;
+        }
+        else
+        {
+            assignedValue = 1;
+        }
+
+        return assignedValue;
+    }
+
+    void BoosterSpawner()
+    {
+        if (spawner == null)
+        {
+            return;
+        }
+
+        float randomX = Random.Range(-5, 5);
     }
 }

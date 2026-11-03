@@ -102,16 +102,31 @@ public class platformSpawnerScript : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Start()
     {
         if (playerScript == null)
-        {
-            GameObject playerObject = GameObject.FindWithTag("Player");
+            playerScript = FindAnyObjectByType<playerScript>();
 
-            if (playerObject != null)
-                playerScript = playerObject.GetComponent<playerScript>();
-        }
         nextPowerUpGap = Random.Range(minPowerUpGap, maxPowerUpGap);
+
+        RandomizePowerUpHierarchy();
+    }
+
+    private void RandomizePowerUpHierarchy()
+    {
+        Transform booster = powerUpsPrefab.transform.Find("Booster");
+        Transform bug = powerUpsPrefab.transform.Find("Bug");
+
+        if (booster == null || bug == null)
+        {
+            Debug.LogError("PowerUps prefab must contain Booster and Bug.");
+            return;
+        }
+
+        int randomPowerUp = BoosterSpawnerRandomizer();
+
+        booster.gameObject.SetActive(randomPowerUp == 2);
+        bug.gameObject.SetActive(randomPowerUp == 1);
     }
 
 
@@ -132,6 +147,7 @@ public class platformSpawnerScript : MonoBehaviour
 
         // Destroy containers independently of spawning.
         DestroyBlockContainer();
+        DestroyPowerUpContainer();
 
         if (playerScript == null)
             return;
@@ -321,6 +337,30 @@ public class platformSpawnerScript : MonoBehaviour
             if (container.transform.position.y <= destroyerY)
             {
                 Destroy(container);
+            }
+        }
+    }
+
+    private void DestroyPowerUpContainer()
+    {
+        if (Destroyer == null)
+            return;
+
+        float destroyerY = Destroyer.transform.position.y;
+
+        GameObject[] powerUps =
+            GameObject.FindGameObjectsWithTag("PowerUps");
+
+        foreach (GameObject powerUp in powerUps)
+        {
+            if (powerUp == null)
+                continue;
+
+            // Only destroy PowerUps that have passed below
+            // the Destroyer's Y position.
+            if (powerUp.transform.position.y <= destroyerY)
+            {
+                Destroy(powerUp);
             }
         }
     }

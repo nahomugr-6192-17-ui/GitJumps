@@ -12,6 +12,7 @@ TagManager:
   - Bug
   - Booster
   - Commit
+  - PowerUps
   layers:
   - Default
   - TransparentFX

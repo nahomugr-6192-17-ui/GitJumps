@@ -31,7 +31,7 @@ public class playerScript : MonoBehaviour
 
     private bool jumpWasHeld;
     [Header("Commit Boost")]
-    public float commitJumpMultiplier = 1.4f;
+    public float commitJumpMultiplier = 3f;
     public float commitBoostDuration = 0.95f;
 
     private float defaultJumpForceMultiplier;
@@ -324,6 +324,10 @@ public class playerScript : MonoBehaviour
             Debug.Log("Commit activated!");
 
             ActivateCommitBoost();
+            spawnerController.TriggerPlatformSpeedBoost(
+                5f,
+                1f
+            );
 
             // Start the particle trail.
             if (commitParticleEffect != null)
@@ -350,39 +354,28 @@ public class playerScript : MonoBehaviour
 
     private void ActivateCommitBoost()
     {
-        // Stop an existing Commit boost timer, if there is one.
         isCoolingPlatformSpeed = true;
+
         if (commitBoostCoroutine != null)
         {
             StopCoroutine(commitBoostCoroutine);
         }
 
-        // Apply the stronger jump multiplier.
-        jumpForceMultiplier =
-            defaultJumpForceMultiplier * commitJumpMultiplier;
-
-        // Immediately launch the player upward.
+        // Prevent the normal jump from interfering with the boost.
         isGrounded = false;
         StopPlatformCarry();
 
+        // Give the player a strong upward launch.
         rb.linearVelocityY = 0f;
 
         rb.AddForce(
-            Vector2.up * jumpForce * jumpForceMultiplier,
+            Vector2.up * jumpForce * commitJumpMultiplier,
             ForceMode2D.Impulse
         );
 
-        // Increase platform speed for 1 second.
-        if (spawnerController != null)
-        {
-            spawnerController.TriggerPlatformSpeedBoost(
-                8f,
-                commitBoostDuration
-            );
-        }
-
-        // Start the timer to restore the jump multiplier.
+        // Restore the normal jump multiplier after the boost duration.
         commitBoostCoroutine = StartCoroutine(ResetCommitBoost());
+
     }
 
     private System.Collections.IEnumerator ResetCommitBoost()

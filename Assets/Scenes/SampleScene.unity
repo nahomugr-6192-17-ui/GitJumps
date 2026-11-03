@@ -5117,18 +5117,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::platformSpawnerScript
   gapBetweenPlatforms: 2.5
   platformPrefab: {fileID: 5204535704524473661, guid: 17810e1da2d36ab40a8224361ec6637b, type: 3}
-  minX: -1
-  maxX: 1
+  minX: -0.5
+  maxX: 0.5
   spawner: {fileID: 169303445}
   playerScript: {fileID: 1523750183}
-  powerUpsPrefab: {fileID: 7711268247521975725}
+  powerUpsPrefab: {fileID: 3884415145978387781, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
   powerUpMinX: -5
   powerUpMaxX: 5
   minPowerUpGap: 7
-  maxPowerUpGap: 13
-  basePlatformSpeed: 0.6
-  speedBoostMultiplier: 4
-  speedBoostDuration: 0.6
+  maxPowerUpGap: 10
+  basePlatformSpeed: 0.9
+  speedBoostMultiplier: 5
+  speedBoostDuration: 0.001
   platformSpeedCoolingRate: 1
   Destroyer: {fileID: 501061539}
   LandingBlock: {fileID: 1598638660}
@@ -6186,8 +6186,8 @@ MonoBehaviour:
   horizontalAcceleration: 35
   horizontalDeceleration: 45
   jumpCutMultiplier: 0.5
-  commitJumpMultiplier: 1.4
-  commitBoostDuration: 0.95
+  commitJumpMultiplier: 2
+  commitBoostDuration: 1.2
   Commit: {fileID: 8149861642825298336}
   Bug: {fileID: 3710025063451728636}
   isCommitTriggered: 0
@@ -6436,13 +6436,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 472773342878782623, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1976448898465684563, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.37
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1976448898465684563, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1976448898465684563, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_LocalPosition.z
@@ -6476,9 +6480,37 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2225721912300224253, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 8.83
+      objectReference: {fileID: 0}
+    - target: {fileID: 2225721912300224253, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3344050430256564769, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.99
+      objectReference: {fileID: 0}
+    - target: {fileID: 3344050430256564769, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.99
+      objectReference: {fileID: 0}
     - target: {fileID: 3884415145978387781, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_Name
       value: PowerUps
+      objectReference: {fileID: 0}
+    - target: {fileID: 3884415145978387781, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3884415145978387781, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_TagString
+      value: PowerUps
+      objectReference: {fileID: 0}
+    - target: {fileID: 6319637249948448487, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6442892758487758030, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: playerScript
@@ -6493,11 +6525,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
---- !u!1 &7711268247521975725 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3884415145978387781, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
-  m_PrefabInstance: {fileID: 4220207003658004468}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8149861642825298336 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 472773342878782623, guid: 7b7b630deb2935641ac19740289fee94, type: 3}

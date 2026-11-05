@@ -478,6 +478,7 @@ public class playerScript : MonoBehaviour
         {
             spawnerController.basePlatformSpeed = 0f;
             buttonsEnabled = false;
+            Activate
         }
     }
 }

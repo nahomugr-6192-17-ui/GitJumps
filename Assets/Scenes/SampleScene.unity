@@ -6214,6 +6214,7 @@ MonoBehaviour:
   isGameOver: 0
   gameOverTriggerY: -30
   collapseFadeDuration: 0.4
+  currentScoreUI: {fileID: 2098014305}
 --- !u!60 &1523750184
 PolygonCollider2D:
   m_ObjectHideFlags: 0

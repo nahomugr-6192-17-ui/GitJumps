@@ -64,13 +64,16 @@ public class playerScript : MonoBehaviour
 
     private HashSet<GameObject> fadingObjects = new HashSet<GameObject>();
 
-    public UIDocument scoreUIDocument;
+    public UIDocument currentScoreUI;
+    private Label currentScoreLabel;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         camera = GameObject.Find("Main Camera");
+        currentScoreLabel = currentScoreUI.rootVisualElement.Q<Label>("currentScoreLabel");
         currentScore = 0;
+        currentScoreLabel.text = "Score: " + currentScore.ToString();
         spawnerController = FindAnyObjectByType<platformSpawnerScript>();
         defaultJumpForceMultiplier = jumpForceMultiplier;
         playerSprite = GetComponent<SpriteRenderer>();
@@ -419,6 +422,7 @@ public class playerScript : MonoBehaviour
                 }*/
                 PlayerPrefs.SetInt("Score", currentScore);
                 Debug.Log("Score: " + currentScore);
+                currentScoreLabel.text = "Score: " + currentScore.ToString();
             }
         }
 

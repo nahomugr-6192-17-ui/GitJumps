@@ -45,6 +45,13 @@ public class platformSpawnerScript : MonoBehaviour
     public GameObject Destroyer;
     public GameObject LandingBlock;
 
+    [Header("PowerUp Horizontal Movement")]
+    public int minStationaryPowerUps = 2;
+    public int maxStationaryPowerUps = 4;
+
+    private int stationaryPowerUpCount = 0;
+    private int nextMovingPowerUpCount;
+
     public float CurrentPlatformSpeed
     {
         get
@@ -110,6 +117,8 @@ public class platformSpawnerScript : MonoBehaviour
         nextPowerUpGap = Random.Range(minPowerUpGap, maxPowerUpGap);
 
         RandomizePowerUpHierarchy();
+
+        nextMovingPowerUpCount = Random.Range(minStationaryPowerUps, maxStationaryPowerUps + 1);
     }
 
     private void RandomizePowerUpHierarchy()
@@ -259,6 +268,29 @@ public class platformSpawnerScript : MonoBehaviour
             spawnPosition,
             Quaternion.identity
         );
+
+        powerUpsMovementScript movement =
+    newPowerUp.GetComponent<powerUpsMovementScript>();
+
+        if (movement != null)
+        {
+            if (stationaryPowerUpCount >= nextMovingPowerUpCount)
+            {
+                movement.moveHorizontally = true;
+
+                stationaryPowerUpCount = 0;
+
+                nextMovingPowerUpCount = Random.Range(
+                    minStationaryPowerUps,
+                    maxStationaryPowerUps + 1
+                );
+            }
+            else
+            {
+                movement.moveHorizontally = false;
+                stationaryPowerUpCount++;
+            }
+        }
 
         Transform booster = newPowerUp.transform.Find("Booster");
         Transform bug = newPowerUp.transform.Find("Bug");

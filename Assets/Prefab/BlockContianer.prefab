@@ -241,7 +241,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3.09, y: 0.3}
+  m_Size: {x: 2.81, y: 0.2}
   m_EdgeRadius: 0
 --- !u!251 &7666152112172182860
 PlatformEffector2D:
@@ -400,7 +400,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3.09, y: 0.3}
+  m_Size: {x: 2.81, y: 0.2}
   m_EdgeRadius: 0
 --- !u!251 &3365245375877968859
 PlatformEffector2D:
@@ -559,7 +559,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3.09, y: 0.3}
+  m_Size: {x: 2.81, y: 0.2}
   m_EdgeRadius: 0
 --- !u!251 &7209946280581149590
 PlatformEffector2D:
@@ -718,7 +718,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3.09, y: 0.3}
+  m_Size: {x: 2.81, y: 0.2}
   m_EdgeRadius: 0
 --- !u!251 &8405182671874917639
 PlatformEffector2D:

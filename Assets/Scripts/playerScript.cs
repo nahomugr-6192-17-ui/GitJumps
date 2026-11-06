@@ -51,7 +51,7 @@ public class playerScript : MonoBehaviour
     private SpriteRenderer playerSprite;
     private Coroutine bugFlashCoroutine;
 
-    private float gapBetweenBoosters = 10f;
+    //private float gapBetweenBoosters = 10f;
 
     public bool isGameOver = false;
     [Header("Game Over")]
@@ -470,6 +470,7 @@ public class playerScript : MonoBehaviour
             isBugTriggered = true;
             BugCollision();
             isGameOver = true;
+            Destroy(Commit);
         }
     }
 

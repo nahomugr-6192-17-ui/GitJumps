@@ -6068,6 +6068,8 @@ GameObject:
   - component: {fileID: 1523750183}
   - component: {fileID: 1523750182}
   - component: {fileID: 1523750184}
+  - component: {fileID: 1523750185}
+  - component: {fileID: 1523750186}
   m_Layer: 0
   m_Name: Player (Github Cat)
   m_TagString: Player
@@ -6144,7 +6146,7 @@ Transform:
   m_GameObject: {fileID: 1523750177}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.8588, y: -7.8088, z: 0}
+  m_LocalPosition: {x: 0.27, y: -8.38, z: 0}
   m_LocalScale: {x: 3.219004, y: 3.0526452, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6253,7 +6255,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.71, y: 0.88}
+    oldSize: {x: 0.8827586, y: 0.8827586}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -6261,25 +6263,95 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0.265, y: -0.03}
-      - {x: 0.205, y: -0.03}
-      - {x: 0.185, y: -0.049999997}
-      - {x: 0.185, y: -0.07}
-      - {x: 0.185, y: -0.01}
-      - {x: 0.21499999, y: 0}
-      - {x: 0.235, y: 0.099999994}
-      - {x: 0.205, y: 0.31}
-      - {x: 0.145, y: 0.32999998}
-      - {x: -0.175, y: 0.32999998}
-      - {x: -0.225, y: 0.26}
-      - {x: -0.235, y: 0.22999999}
-      - {x: -0.235, y: -0.22999999}
-      - {x: -0.21499999, y: -0.37}
-      - {x: 0.13499999, y: -0.37}
-      - {x: 0.16499999, y: -0.35999998}
-      - {x: 0.305, y: -0.17}
-      - {x: 0.305, y: -0.07}
+    - - {x: 0.024137931, y: -0.30344826}
+      - {x: 0.0862069, y: -0.30344826}
+      - {x: 0.11724138, y: -0.29310346}
+      - {x: 0.096551724, y: -0.23793103}
+      - {x: 0.10344827, y: -0.15862069}
+      - {x: 0.20689654, y: -0.072413795}
+      - {x: 0.22068965, y: -0.013793103}
+      - {x: 0.22068965, y: 0.072413795}
+      - {x: 0.2137931, y: 0.096551724}
+      - {x: 0.17931035, y: 0.11034483}
+      - {x: 0.15517241, y: 0.096551724}
+      - {x: 0.12413793, y: -0.037931032}
+      - {x: 0.113793105, y: 0.0068965517}
+      - {x: 0.12068965, y: 0.06896552}
+      - {x: 0.1724138, y: 0.14482759}
+      - {x: 0.14482759, y: 0.31724137}
+      - {x: 0.13448276, y: 0.3275862}
+      - {x: 0.10689655, y: 0.3275862}
+      - {x: 0.055172414, y: 0.29310346}
+      - {x: -0.027586207, y: 0.29655173}
+      - {x: -0.0862069, y: 0.3275862}
+      - {x: -0.13448276, y: 0.3275862}
+      - {x: -0.15172413, y: 0.32413793}
+      - {x: -0.16551724, y: 0.22413793}
+      - {x: -0.16551724, y: 0.14827587}
+      - {x: -0.16206896, y: 0.12068965}
+      - {x: -0.14482759, y: 0.093103446}
+      - {x: -0.0862069, y: 0.051724136}
+      - {x: -0.12413793, y: -0.010344828}
+      - {x: -0.13103448, y: -0.1275862}
+      - {x: -0.1, y: -0.15862069}
+      - {x: -0.07931034, y: -0.15172413}
+      - {x: -0.10344827, y: -0.26551723}
+      - {x: -0.12068965, y: -0.29655173}
+      - {x: -0.089655176, y: -0.30344826}
+      - {x: -0.0068965517, y: -0.30344826}
+      - {x: 0, y: -0.28965518}
+      - {x: -0.0068965517, y: -0.17586207}
+      - {x: 0.0034482758, y: -0.28965518}
+    - - {x: -0.05862069, y: -0.051724136}
+      - {x: -0.062068965, y: -0.04137931}
+      - {x: -0.06551724, y: -0.06896552}
+      - {x: -0.06551724, y: -0.072413795}
+      - {x: -0.062068965, y: -0.072413795}
+    - - {x: 0.062068965, y: -0.044827588}
+      - {x: 0.062068965, y: -0.06551724}
+      - {x: 0.06551724, y: -0.06551724}
   m_UseDelaunayMesh: 1
+--- !u!95 &1523750185
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1523750177}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 22222222222222222222222222222201, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1523750186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1523750177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4e5f6a1b2c30718293a4b5c6d7e8f01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimationController
+  idleSprite: {fileID: -7232521027535748977, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  idleBreatheSprite: {fileID: 1001, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  jumpSprite: {fileID: 1002, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  fallSprite: {fileID: 1003, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  landSprite: {fileID: 1004, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  landDuration: 0.14
+  idleCycleDuration: 0.8
 --- !u!1 &1598638660
 GameObject:
   m_ObjectHideFlags: 0

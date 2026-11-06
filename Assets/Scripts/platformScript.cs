@@ -7,7 +7,7 @@ public class platformScript : MonoBehaviour
     [Header("Platform Movement")]
     public bool playerIsStandingOnThisPlatform = false;
     public Transform player;
-
+    private Rigidbody2D playerRb;
     private float currentSpeed;
 
     [Header("Number of Platforms")]
@@ -41,10 +41,13 @@ public class platformScript : MonoBehaviour
         GameObject playerObject = GameObject.FindWithTag("Player");
 
         if (playerObject != null)
+        {
             playerScript = playerObject.GetComponent<playerScript>();
+            playerRb = playerObject.GetComponent<Rigidbody2D>();
+        }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         PlatformMovement();
         MoveActivePlatform();
@@ -130,9 +133,11 @@ public class platformScript : MonoBehaviour
         Vector3 movementDelta =
             activePlatform.transform.position - previousPosition;
 
-        if (playerIsStandingOnThisPlatform && player != null)
+        if (playerIsStandingOnThisPlatform && playerRb != null)
         {
-            player.position += movementDelta;
+            playerRb.MovePosition(
+                playerRb.position + (Vector2)movementDelta
+            );
         }
     }
 

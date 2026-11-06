@@ -5126,7 +5126,7 @@ MonoBehaviour:
   powerUpMaxX: 5
   minPowerUpGap: 7
   maxPowerUpGap: 10
-  basePlatformSpeed: 0.9
+  basePlatformSpeed: 0.95
   speedBoostMultiplier: 5
   speedBoostDuration: 0.001
   platformSpeedCoolingRate: 1
@@ -6144,8 +6144,8 @@ Transform:
   m_GameObject: {fileID: 1523750177}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.8775, y: -7.7013, z: 0}
-  m_LocalScale: {x: 3.271678, y: 3.2969491, z: 1}
+  m_LocalPosition: {x: -0.8588, y: -7.8088, z: 0}
+  m_LocalScale: {x: 3.219004, y: 3.0526452, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 11177088}
@@ -6213,8 +6213,9 @@ MonoBehaviour:
   bugFlashInterval: 0.08
   isGameOver: 0
   gameOverTriggerY: -30
---- !u!61 &1523750184
-BoxCollider2D:
+  collapseFadeDuration: 0.4
+--- !u!60 &1523750184
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -6257,8 +6258,27 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.81, y: 0.9}
-  m_EdgeRadius: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0.265, y: -0.03}
+      - {x: 0.205, y: -0.03}
+      - {x: 0.185, y: -0.049999997}
+      - {x: 0.185, y: -0.07}
+      - {x: 0.185, y: -0.01}
+      - {x: 0.21499999, y: 0}
+      - {x: 0.235, y: 0.099999994}
+      - {x: 0.205, y: 0.31}
+      - {x: 0.145, y: 0.32999998}
+      - {x: -0.175, y: 0.32999998}
+      - {x: -0.225, y: 0.26}
+      - {x: -0.235, y: 0.22999999}
+      - {x: -0.235, y: -0.22999999}
+      - {x: -0.21499999, y: -0.37}
+      - {x: 0.13499999, y: -0.37}
+      - {x: 0.16499999, y: -0.35999998}
+      - {x: 0.305, y: -0.17}
+      - {x: 0.305, y: -0.07}
+  m_UseDelaunayMesh: 1
 --- !u!1 &1598638660
 GameObject:
   m_ObjectHideFlags: 0
@@ -6439,6 +6459,61 @@ MonoBehaviour:
   maxX: 8
   playerScript: {fileID: 1523750183}
   spawnerController: {fileID: 169303448}
+--- !u!1 &2098014304
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2098014306}
+  - component: {fileID: 2098014305}
+  m_Layer: 5
+  m_Name: ScoringUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2098014305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2098014304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: de30f8f6b099d424aa1a00faf113dafd, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 8ae5c31a60c328a4f8a37f13d2f661ee, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &2098014306
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2098014304}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3710025063451728636 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6319637249948448487, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
@@ -6498,11 +6573,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2225721912300224253, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 8.83
+      value: -2.94
       objectReference: {fileID: 0}
     - target: {fileID: 2225721912300224253, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 5.73
       objectReference: {fileID: 0}
     - target: {fileID: 2768438988867601779, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_Sprite
@@ -6518,11 +6593,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3854711922217378453, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.x
-      value: 0.94
+      value: 0.96
       objectReference: {fileID: 0}
     - target: {fileID: 3854711922217378453, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
-      value: 0.81
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 3884415145978387781, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_Name
@@ -6536,9 +6611,13 @@ PrefabInstance:
       propertyPath: m_TagString
       value: PowerUps
       objectReference: {fileID: 0}
+    - target: {fileID: 4302832574447014008, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6319637249948448487, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6442892758487758030, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: playerScript
@@ -6548,6 +6627,10 @@ PrefabInstance:
       propertyPath: spawnerController
       value: 
       objectReference: {fileID: 169303448}
+    - target: {fileID: 7862626744947322061, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 9003493970520636401, guid: d86f6fbed1161864c806088d39c93d71, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6570,6 +6653,7 @@ SceneRoots:
   - {fileID: 331741521}
   - {fileID: 501061541}
   - {fileID: 1598638664}
+  - {fileID: 2098014306}
   - {fileID: 4220207003658004468}
   - {fileID: 930100538}
   - {fileID: 794070320}

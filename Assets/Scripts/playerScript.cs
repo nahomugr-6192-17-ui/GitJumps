@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 public class playerScript : MonoBehaviour
 {
@@ -57,6 +58,13 @@ public class playerScript : MonoBehaviour
     public float gameOverTriggerY = -30f;
     private bool gameOverTriggerEnabled = false;
     private Collider2D playerCollider;
+
+    [Header("Landing Disappearance Effect")]
+    public float collapseFadeDuration = 0.4f;
+
+    private HashSet<GameObject> fadingObjects = new HashSet<GameObject>();
+
+    public UIDocument scoreUIDocument;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -155,6 +163,11 @@ public class playerScript : MonoBehaviour
 
             isGrounded = true;
 
+            if (collision.gameObject.CompareTag("Platform"))
+            {
+                CollapseObjectsBelow(collision.gameObject);
+            }
+
             // Boost when landing on a platform above the target height.
             if (collision.gameObject.CompareTag("Platform") &&
                 transform.position.y >= 4.6f &&
@@ -191,6 +204,110 @@ public class playerScript : MonoBehaviour
 
             break;
         }
+    }
+
+    private void CollapseObjectsBelow(GameObject landedPlatform)
+    {
+        float landingY = landedPlatform.transform.position.y;
+
+        // Find platforms underneath the platform the player landed on.
+        GameObject[] platforms =
+            GameObject.FindGameObjectsWithTag("Platform");
+
+        foreach (GameObject platform in platforms)
+        {
+            if (platform == landedPlatform)
+                continue;
+
+            if (platform.transform.position.y < landingY)
+            {
+                StartFade(platform);
+            }
+        }
+
+        // Find Bugs underneath the landing platform.
+        GameObject[] bugs =
+            GameObject.FindGameObjectsWithTag("Bug");
+
+        foreach (GameObject bug in bugs)
+        {
+            if (bug.transform.position.y < landingY)
+            {
+                StartFade(bug);
+            }
+        }
+
+        // Find Commit/Booster objects underneath the landing platform.
+        GameObject[] commits =
+            GameObject.FindGameObjectsWithTag("Commit");
+
+        foreach (GameObject commit in commits)
+        {
+            if (commit.transform.position.y < landingY)
+            {
+                StartFade(commit);
+            }
+        }
+    }
+
+
+    private void StartFade(GameObject target)
+    {
+        if (target == null || fadingObjects.Contains(target))
+            return;
+
+        fadingObjects.Add(target);
+
+        StartCoroutine(FadeAndDestroy(target));
+    }
+
+
+    private System.Collections.IEnumerator FadeAndDestroy(GameObject target)
+    {
+        SpriteRenderer[] sprites =
+            target.GetComponentsInChildren<SpriteRenderer>(true);
+
+        Collider2D[] colliders =
+            target.GetComponentsInChildren<Collider2D>(true);
+
+        // Prevent interaction while the object is disappearing.
+        foreach (Collider2D col in colliders)
+        {
+            col.enabled = false;
+        }
+
+        Color[] originalColors = new Color[sprites.Length];
+
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            originalColors[i] = sprites[i].color;
+        }
+
+        float elapsed = 0f;
+
+        while (elapsed < collapseFadeDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            float alpha = 1f - Mathf.Clamp01(
+                elapsed / collapseFadeDuration
+            );
+
+            for (int i = 0; i < sprites.Length; i++)
+            {
+                if (sprites[i] != null)
+                {
+                    Color color = originalColors[i];
+                    color.a = originalColors[i].a * alpha;
+
+                    sprites[i].color = color;
+                }
+            }
+
+            yield return null;
+        }
+
+        Destroy(target);
     }
     void OnCollisionExit2D(Collision2D collision)
     {

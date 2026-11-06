@@ -54,6 +54,8 @@ public class playerScript : MonoBehaviour
     //private float gapBetweenBoosters = 10f;
 
     public bool isGameOver = false;
+    public bool playerIsFalling = false;
+    private Color originalPlayerColor = Color.white;
     [Header("Game Over")]
     public float gameOverTriggerY = -30f;
     private bool gameOverTriggerEnabled = false;
@@ -66,6 +68,8 @@ public class playerScript : MonoBehaviour
 
     public UIDocument currentScoreUI;
     private Label currentScoreLabel;
+    private bool isSprintBlockerActive = true;
+    private GameObject sprintBlocker;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -76,8 +80,10 @@ public class playerScript : MonoBehaviour
         currentScoreLabel.text = "Score: " + currentScore.ToString();
         spawnerController = FindAnyObjectByType<platformSpawnerScript>();
         defaultJumpForceMultiplier = jumpForceMultiplier;
-        playerSprite = GetComponent<SpriteRenderer>();
+        playerSprite = GetComponentInChildren<SpriteRenderer>();
+        if (playerSprite != null) originalPlayerColor = playerSprite.color;
         playerCollider = GetComponent<Collider2D>();
+        sprintBlocker = GameObject.FindWithTag("SprintBlocker");
     }
 
     // Update is called once per frame
@@ -143,6 +149,7 @@ public class playerScript : MonoBehaviour
         );
         Debug.Log("Distance between boosters: " + distanceBetweenBoosters);
         */
+        ActivateSprintBlocker();
         GameOver();
         UpdateGameOverTrigger();
     }
@@ -155,6 +162,13 @@ public class playerScript : MonoBehaviour
         if (!collision.gameObject.CompareTag("Floor") &&
             !collision.gameObject.CompareTag("Platform"))
         {
+            return;
+        }
+
+        // Game Over landing: safely halt motion and lock into lying pose on the floor
+        if (collision.gameObject.CompareTag("Floor") && isGameOver)
+        {
+            HandleFloorLanding();
             return;
         }
 
@@ -421,7 +435,6 @@ public class playerScript : MonoBehaviour
                     PlayerPrefs.SetInt("HighScore", highScore);
                 }*/
                 PlayerPrefs.SetInt("Score", currentScore);
-                Debug.Log("Score: " + currentScore);
                 currentScoreLabel.text = "Score: " + currentScore.ToString();
             }
         }
@@ -442,6 +455,7 @@ public class playerScript : MonoBehaviour
         if (collision.gameObject.CompareTag("Commit"))
         {
             isCommitTriggered = true;
+            isSprintBlockerActive = false;
             Debug.Log("Commit activated!");
 
             ActivateCommitBoost();
@@ -465,12 +479,23 @@ public class playerScript : MonoBehaviour
             Destroy(collision.gameObject);
         }
 
+        if (collision.gameObject.CompareTag("Floor") && isGameOver)
+        {
+            HandleFloorLanding();
+            return;
+        }
+
         if (collision.gameObject.CompareTag("Bug"))
         {
+            if (isBugTriggered) return;
             isBugTriggered = true;
-            BugCollision();
+            playerIsFalling = true;
             isGameOver = true;
-            Destroy(Commit);
+            BugCollision();
+            Destroy(collision.gameObject);
+            if (Commit != null) Destroy(Commit);
+            PlayerAnimationController animCtrl = GetComponent<PlayerAnimationController>();
+            if (animCtrl != null) animCtrl.TriggerBugVibration();
         }
     }
 
@@ -500,11 +525,19 @@ public class playerScript : MonoBehaviour
 
     }
 
+    void ActivateSprintBlocker()
+    {
+        if (sprintBlocker == null) return;
+        sprintBlocker.SetActive(isSprintBlockerActive);
+    }
+
     private System.Collections.IEnumerator ResetCommitBoost()
     {
         yield return new WaitForSeconds(commitBoostDuration);
 
         jumpForceMultiplier = defaultJumpForceMultiplier;
+
+        isSprintBlockerActive = true;
 
         commitBoostCoroutine = null;
     }
@@ -551,26 +584,39 @@ public class playerScript : MonoBehaviour
     {
         float elapsedTime = 0f;
 
-        Color originalColor = playerSprite.color;
-
         while (elapsedTime < bugFlashDuration)
         {
-            playerSprite.color = Color.red;
+            if (playerSprite != null) playerSprite.color = Color.red;
 
             yield return new WaitForSeconds(bugFlashInterval);
 
-            playerSprite.color = originalColor;
+            if (playerSprite != null) playerSprite.color = originalPlayerColor;
 
             yield return new WaitForSeconds(bugFlashInterval);
 
             elapsedTime += bugFlashInterval * 2f;
         }
 
-        playerSprite.color = originalColor;
+        if (playerSprite != null) playerSprite.color = originalPlayerColor;
 
         bugFlashCoroutine = null;
     }
 
+
+    public void HandleFloorLanding()
+    {
+        if (!isGameOver) return;
+        rb.linearVelocity = Vector2.zero;
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        if (bugFlashCoroutine != null)
+        {
+            StopCoroutine(bugFlashCoroutine);
+            bugFlashCoroutine = null;
+        }
+        if (playerSprite != null) playerSprite.color = originalPlayerColor;
+        PlayerAnimationController animCtrl = GetComponent<PlayerAnimationController>();
+        if (animCtrl != null) animCtrl.TriggerLieDown();
+    }
     void UpdateGameOverTrigger()
     {
         if (!isGameOver || playerCollider == null)
@@ -587,7 +633,6 @@ public class playerScript : MonoBehaviour
         if (transform.position.y <= gameOverTriggerY)
         {
             playerCollider.isTrigger = false;
-            gameOverTriggerEnabled = false;
         }
     }
 

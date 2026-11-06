@@ -2,8 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// Smooth 2D character animation controller for GitJumps.
-/// Drives Idle, Jump, Falling, and Landing visual poses based on player movement state
-/// without modifying player physics, colliders, or gameplay mechanics.
+/// Drives Idle, Tucked Jump, Commit Boost, Downward Dive Fall, Bug Vibration, and Floor Lie Down poses
+/// seamlessly based on player movement state, physics, and collisions without modifying core game logic.
 /// </summary>
 [DisallowMultipleComponent]
 public class PlayerAnimationController : MonoBehaviour
@@ -14,86 +14,272 @@ public class PlayerAnimationController : MonoBehaviour
     private SpriteRenderer sr;
     private bool wasGrounded = true;
 
+    [Header("Visual Container")]
+    public Transform visualTransform;
+
     [Header("Poses")]
     public Sprite idleSprite;
     public Sprite idleBreatheSprite;
     public Sprite jumpSprite;
+    public Sprite boostSprite;
     public Sprite fallSprite;
     public Sprite landSprite;
+    public Sprite lieDownSprite;
 
     [Header("Timing")]
     public float landDuration = 0.14f;
     public float idleCycleDuration = 0.8f;
+    public float bugVibrationDuration = 0.4f;
+
+    [Header("Tilt & Smoothness")]
+    public float maxDiveAngle = 165f;
+    public float tiltSmoothSpeed = 8f;
 
     private float landTimer = 0f;
     private float idleTimer = 0f;
+    private float bugVibrationTimer = 0f;
     private bool idleBreatheState = false;
+    private bool isLyingDown = false;
+    private float currentZAngle = 0f;
 
     void Awake()
     {
         player = GetComponent<playerScript>();
         rb = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>();
-        sr = GetComponent<SpriteRenderer>();
+
+        // Wire visualTransform: use assigned field, child named "CatVisual", or this transform
+        if (visualTransform == null)
+        {
+            Transform child = transform.Find("CatVisual");
+            visualTransform = child != null ? child : transform;
+        }
+
+        sr = visualTransform.GetComponent<SpriteRenderer>();
+        if (sr == null) sr = GetComponentInChildren<SpriteRenderer>();
+
+        anim = visualTransform.GetComponent<Animator>();
+        if (anim == null) anim = GetComponentInChildren<Animator>();
+    }
+
+    void Start()
+    {
+        // Load fallback sprites from Resources or sprite sheet if unassigned
+        if (idleSprite == null || jumpSprite == null || boostSprite == null || fallSprite == null || lieDownSprite == null)
+        {
+            Sprite[] sheet = Resources.FindObjectsOfTypeAll<Sprite>();
+            foreach (Sprite s in sheet)
+            {
+                if (idleSprite == null && s.name == "Cat_0") idleSprite = s;
+                if (idleBreatheSprite == null && s.name == "Cat_Idle_1") idleBreatheSprite = s;
+                if (jumpSprite == null && s.name == "Cat_Jump") jumpSprite = s;
+                if (fallSprite == null && s.name == "Cat_Fall") fallSprite = s;
+                if (landSprite == null && s.name == "Cat_Land") landSprite = s;
+                if (boostSprite == null && s.name == "Cat_Jump_Boost") boostSprite = s;
+                if (lieDownSprite == null && s.name == "Cat_LieDown") lieDownSprite = s;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Triggered upon Bug collision: initiates 0.4s rapid shaking without stopping downward gravity acceleration.
+    /// </summary>
+    public void TriggerBugVibration()
+    {
+        bugVibrationTimer = bugVibrationDuration;
+        if (anim != null && anim.runtimeAnimatorController != null)
+        {
+            anim.SetTrigger("BugHit");
+        }
+    }
+
+    /// <summary>
+    /// Triggered when the player reaches the floor at Game Over: locks player horizontally on the floor.
+    /// </summary>
+    public void TriggerLieDown()
+    {
+        isLyingDown = true;
+        bugVibrationTimer = 0f;
+        landTimer = 0f;
+        currentZAngle = 0f;
+
+        if (visualTransform != null)
+        {
+            visualTransform.localPosition = Vector3.zero;
+            visualTransform.localRotation = Quaternion.identity;
+        }
+
+        if (lieDownSprite != null && sr != null)
+        {
+            sr.sprite = lieDownSprite;
+        }
+
+        if (anim != null && anim.runtimeAnimatorController != null)
+        {
+            anim.SetBool("IsGameOverFloor", true);
+            anim.Play("LieDown");
+        }
     }
 
     void Update()
     {
+        // =========================================================================
+        // PRIORITY 1: GAME OVER FLOOR (HORIZONTAL LYING DOWN)
+        // =========================================================================
+        if (isLyingDown)
+        {
+            if (visualTransform != null)
+            {
+                visualTransform.localPosition = Vector3.zero;
+                visualTransform.localRotation = Quaternion.identity;
+            }
+            if (lieDownSprite != null && sr != null)
+            {
+                sr.sprite = lieDownSprite;
+            }
+            return;
+        }
+
         bool isGrounded = player != null ? player.isGrounded : true;
         float velY = rb != null ? rb.linearVelocity.y : 0f;
+        bool isGameOver = player != null && player.isGameOver;
+        bool isFalling = player != null && player.playerIsFalling;
+        bool isBug = player != null && player.isBugTriggered;
 
-        // Detect landing impact when transitioning from airborne to grounded
-        if (!wasGrounded && isGrounded && velY <= 0.2f)
+        // Death/Falling condition: ONLY true when game over / death fall has actually started!
+        // A negative vertical velocity by itself NEVER causes isDeathFalling!
+        bool isDeathFalling = (isGameOver || isFalling || isBug) && !isGrounded;
+
+        // Detect landing impact when transitioning from airborne to grounded during normal gameplay
+        if (!wasGrounded && isGrounded && velY <= 0.2f && !isGameOver)
         {
             landTimer = landDuration;
-            if (anim != null)
+            if (anim != null && anim.runtimeAnimatorController != null)
             {
                 anim.SetTrigger("Land");
             }
         }
 
-        // Animator state machine update
+        bool isBoosted = player != null && player.isCommitTriggered;
+
+        // Update Animator parameters
         if (anim != null && anim.runtimeAnimatorController != null)
         {
             anim.SetBool("IsGrounded", isGrounded);
             anim.SetFloat("VelocityY", velY);
+            anim.SetBool("IsBoosted", isBoosted);
+            anim.SetBool("IsDeathFalling", isDeathFalling);
+            anim.SetBool("IsGameOverFloor", isLyingDown);
         }
-        else if (sr != null)
+
+        // =========================================================================
+        // PRIORITY 3: BUG COLLISION VIBRATION
+        // Rapid horizontal shaking (+-0.08f) and alternating rotation (+-4 deg)
+        // Applies ONLY to visualTransform without shaking Rigidbody2D/collider!
+        // =========================================================================
+        if (bugVibrationTimer > 0f)
         {
-            // Direct Sprite Animation fallback (smooth frame updates)
-            if (landTimer > 0f)
+            bugVibrationTimer -= Time.deltaTime;
+            float shakeFreq = 60f;
+            float shakeX = Mathf.Sin(Time.time * shakeFreq) * 0.08f;
+            float shakeRot = Mathf.Cos(Time.time * shakeFreq) * 4f;
+
+            if (visualTransform != null)
             {
-                landTimer -= Time.deltaTime;
-                if (landSprite != null) sr.sprite = landSprite;
+                visualTransform.localPosition = new Vector3(shakeX, 0f, 0f);
+                visualTransform.localRotation = Quaternion.Euler(0f, 0f, shakeRot);
+            }
+
+            if (sr != null && fallSprite != null)
+            {
+                sr.sprite = fallSprite;
+            }
+
+            if (bugVibrationTimer <= 0f && visualTransform != null)
+            {
+                visualTransform.localPosition = Vector3.zero;
+            }
+
+            wasGrounded = isGrounded;
+            return;
+        }
+
+        // =========================================================================
+        // ROTATION / TILT HANDLING
+        // =========================================================================
+        float targetAngle = 0f;
+
+        if (isDeathFalling)
+        {
+            // Smooth head-down dive ONLY during death/game-over fall
+            float fallProgress = Mathf.Clamp01(-velY / 10f);
+            float velX = rb != null ? rb.linearVelocity.x : 0f;
+            float baseDiveAngle = velX < -0.1f ? maxDiveAngle : -maxDiveAngle;
+            targetAngle = Mathf.Lerp(0f, baseDiveAngle, fallProgress);
+            currentZAngle = Mathf.Lerp(currentZAngle, targetAngle, Time.deltaTime * tiltSmoothSpeed);
+        }
+        else
+        {
+            // Normal gameplay: KEEP THE CAT UPRIGHT (0°) AT ALL TIMES
+            // (Standing, normal jump rise, jump apex, normal jump descent, booster launch, booster descent)
+            currentZAngle = 0f;
+        }
+
+        if (visualTransform != null)
+        {
+            visualTransform.localPosition = Vector3.zero;
+            visualTransform.localRotation = Quaternion.Euler(0f, 0f, currentZAngle);
+        }
+
+        // =========================================================================
+        // SPRITE SELECTION (Code-driven backup / direct synchronization)
+        // =========================================================================
+        if (sr != null)
+        {
+            if (isDeathFalling)
+            {
+                // PRIORITY 2: Death fall pose
+                if (fallSprite != null) sr.sprite = fallSprite;
             }
             else if (!isGrounded)
             {
-                if (velY > 0.5f)
+                if (isBoosted)
                 {
-                    if (jumpSprite != null) sr.sprite = jumpSprite;
+                    // PRIORITY 4: CommitBoost launch & descent (upright)
+                    if (boostSprite != null) sr.sprite = boostSprite;
+                    else if (jumpSprite != null) sr.sprite = jumpSprite;
                 }
                 else
                 {
-                    if (fallSprite != null) sr.sprite = fallSprite;
+                    // PRIORITY 5: Normal Jump (upright tucked pose during both rise and descent!)
+                    if (jumpSprite != null) sr.sprite = jumpSprite;
                 }
             }
             else
             {
-                // Idle breathing & gentle tail motion loop
-                idleTimer += Time.deltaTime;
-                if (idleTimer >= idleCycleDuration)
+                // Grounded
+                if (landTimer > 0f)
                 {
-                    idleTimer = 0f;
-                    idleBreatheState = !idleBreatheState;
+                    landTimer -= Time.deltaTime;
+                    if (landSprite != null) sr.sprite = landSprite;
                 }
+                else
+                {
+                    // PRIORITY 6: Idle approved breathing loop
+                    idleTimer += Time.deltaTime;
+                    if (idleTimer >= idleCycleDuration)
+                    {
+                        idleTimer = 0f;
+                        idleBreatheState = !idleBreatheState;
+                    }
 
-                if (idleBreatheState && idleBreatheSprite != null)
-                {
-                    sr.sprite = idleBreatheSprite;
-                }
-                else if (idleSprite != null)
-                {
-                    sr.sprite = idleSprite;
+                    if (idleBreatheState && idleBreatheSprite != null)
+                    {
+                        sr.sprite = idleBreatheSprite;
+                    }
+                    else if (idleSprite != null)
+                    {
+                        sr.sprite = idleSprite;
+                    }
                 }
             }
         }

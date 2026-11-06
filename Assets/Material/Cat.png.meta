@@ -17,6 +17,12 @@ TextureImporter:
   - first:
       213: 1004
     second: Cat_Land
+  - first:
+      213: 1005
+    second: Cat_Jump_Boost
+  - first:
+      213: 1006
+    second: Cat_LieDown
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -247,6 +253,50 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Cat_Jump_Boost
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f80403be17ce0ab90800000000000005
+      internalID: 1005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cat_LieDown
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f80403be17ce0ab90800000000000006
+      internalID: 1006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -266,6 +316,8 @@ TextureImporter:
       Cat_Jump: 1002
       Cat_Fall: 1003
       Cat_Land: 1004
+      Cat_Jump_Boost: 1005
+      Cat_LieDown: 1006
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

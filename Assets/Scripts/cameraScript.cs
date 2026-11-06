@@ -24,6 +24,7 @@ public class cameraScript : MonoBehaviour
 
     private bool cameraLocked = false;
     private bool playerIsFalling = false;
+    private playerScript playerScriptInstance;
 
     void Start()
     {
@@ -75,6 +76,12 @@ public class cameraScript : MonoBehaviour
             if (player.transform.position.y <= playerFallY)
             {
                 playerIsFalling = true;
+                playerScriptInstance = player.GetComponent<playerScript>();
+                if (playerScriptInstance != null)
+                {
+                    playerScriptInstance.isGameOver = true;
+                    playerScriptInstance.playerIsFalling = true;
+                }
             }
         }
 
@@ -87,7 +94,11 @@ public class cameraScript : MonoBehaviour
         {
             targetY = fallCameraY;
             playerScript = player.GetComponent<playerScript>();
-            playerScript.isGameOver = true;
+            if (playerScript != null)
+            {
+                playerScript.isGameOver = true;
+                playerScript.playerIsFalling = true;
+            }
         }
         else if (cameraLocked)
         {

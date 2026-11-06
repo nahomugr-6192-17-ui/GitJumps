@@ -226,6 +226,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   spawnerController: {fileID: 0}
   playerScript: {fileID: 0}
+  moveHorizontally: 0
+  horizontalSpeed: 3
+  minX: -8
+  maxX: 8
 --- !u!1 &6319637249948448487
 GameObject:
   m_ObjectHideFlags: 0

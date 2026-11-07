@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// Smooth 2D character animation controller for GitJumps.
-/// Drives Idle, Tucked Jump, Commit Boost, Downward Dive Fall, Bug Vibration, and Floor Lie Down poses
+/// Drives Idle, Running (grounded horizontal movement with alternating legs), Tucked Jump,
+/// Commit Boost, Downward Dive Fall, Bug Vibration, and Floor Lie Down poses
 /// seamlessly based on player movement state, physics, and collisions without modifying core game logic.
 /// </summary>
 [DisallowMultipleComponent]
@@ -25,6 +26,13 @@ public class PlayerAnimationController : MonoBehaviour
     public Sprite fallSprite;
     public Sprite landSprite;
     public Sprite lieDownSprite;
+    public Sprite lieDownRestSprite;
+
+    [Header("Running Poses")]
+    public Sprite[] runSprites;
+    public float runCycleSpeed = 10f;
+    private float runTimer = 0f;
+    private int currentRunFrame = 0;
 
     [Header("Timing")]
     public float landDuration = 0.14f;
@@ -63,12 +71,15 @@ public class PlayerAnimationController : MonoBehaviour
 
     void Start()
     {
-        // Load fallback sprites from Resources or sprite sheet if unassigned
-        if (idleSprite == null || jumpSprite == null || boostSprite == null || fallSprite == null || lieDownSprite == null)
+        // Load fallback sprites from Resources or sprite sheet if unassigned or missing
+        bool needsRun = runSprites == null || runSprites.Length == 0 || runSprites[0] == null;
+        if (idleSprite == null || jumpSprite == null || boostSprite == null || fallSprite == null || lieDownSprite == null || lieDownRestSprite == null || needsRun)
         {
             Sprite[] sheet = Resources.FindObjectsOfTypeAll<Sprite>();
+            Sprite r0 = null, r1 = null, r2 = null, r3 = null;
             foreach (Sprite s in sheet)
             {
+                if (s == null) continue;
                 if (idleSprite == null && s.name == "Cat_0") idleSprite = s;
                 if (idleBreatheSprite == null && s.name == "Cat_Idle_1") idleBreatheSprite = s;
                 if (jumpSprite == null && s.name == "Cat_Jump") jumpSprite = s;
@@ -76,6 +87,20 @@ public class PlayerAnimationController : MonoBehaviour
                 if (landSprite == null && s.name == "Cat_Land") landSprite = s;
                 if (boostSprite == null && s.name == "Cat_Jump_Boost") boostSprite = s;
                 if (lieDownSprite == null && s.name == "Cat_LieDown") lieDownSprite = s;
+                if (lieDownRestSprite == null && (s.name == "Cat_LieDown_3" || s.name == "Cat_LieDown_Rest")) lieDownRestSprite = s;
+                if (r0 == null && s.name == "Cat_Run_0") r0 = s;
+                if (r1 == null && s.name == "Cat_Run_1") r1 = s;
+                if (r2 == null && s.name == "Cat_Run_2") r2 = s;
+                if (r3 == null && s.name == "Cat_Run_3") r3 = s;
+            }
+
+            if (needsRun && r0 != null)
+            {
+                runSprites = new Sprite[] { r0, r1 != null ? r1 : r0, r2 != null ? r2 : r0, r3 != null ? r3 : r0 };
+            }
+            if (lieDownRestSprite == null && lieDownSprite != null)
+            {
+                lieDownRestSprite = lieDownSprite;
             }
         }
     }
@@ -108,22 +133,31 @@ public class PlayerAnimationController : MonoBehaviour
             visualTransform.localRotation = Quaternion.identity;
         }
 
-        if (lieDownSprite != null && sr != null)
+        if (sr != null)
         {
-            sr.sprite = lieDownSprite;
+            sr.flipX = false;
         }
 
         if (anim != null && anim.runtimeAnimatorController != null)
         {
             anim.SetBool("IsGameOverFloor", true);
-            anim.Play("LieDown");
+            anim.SetBool("IsGrounded", true);
+            anim.SetBool("IsDeathFalling", false);
+            anim.SetBool("IsRunning", false);
+            anim.SetBool("IsBoosted", false);
+            anim.Play("LieDown", 0, 0f);
+        }
+        else if (sr != null)
+        {
+            if (lieDownRestSprite != null) sr.sprite = lieDownRestSprite;
+            else if (lieDownSprite != null) sr.sprite = lieDownSprite;
         }
     }
 
     void Update()
     {
         // =========================================================================
-        // PRIORITY 1: GAME OVER FLOOR (HORIZONTAL LYING DOWN)
+        // PRIORITY 1: GAME OVER FLOOR (HORIZONTAL LYING DOWN WITH TAIL ON FLOOR)
         // =========================================================================
         if (isLyingDown)
         {
@@ -132,14 +166,36 @@ public class PlayerAnimationController : MonoBehaviour
                 visualTransform.localPosition = Vector3.zero;
                 visualTransform.localRotation = Quaternion.identity;
             }
-            if (lieDownSprite != null && sr != null)
+            if (sr != null)
             {
-                sr.sprite = lieDownSprite;
+                sr.flipX = false;
+            }
+            if (anim != null && anim.runtimeAnimatorController != null)
+            {
+                anim.SetBool("IsGameOverFloor", true);
+                anim.SetBool("IsGrounded", true);
+                anim.SetBool("IsDeathFalling", false);
+                anim.SetBool("IsRunning", false);
+                anim.SetBool("IsBoosted", false);
+            }
+            else if (sr != null)
+            {
+                if (lieDownRestSprite != null) sr.sprite = lieDownRestSprite;
+                else if (lieDownSprite != null) sr.sprite = lieDownSprite;
+            }
+
+            // Guaranteed visibility safety: ensure sprite is never null
+            if (sr != null && sr.sprite == null)
+            {
+                if (lieDownRestSprite != null) sr.sprite = lieDownRestSprite;
+                else if (lieDownSprite != null) sr.sprite = lieDownSprite;
+                else if (idleSprite != null) sr.sprite = idleSprite;
             }
             return;
         }
 
         bool isGrounded = player != null ? player.isGrounded : true;
+        float velX = rb != null ? rb.linearVelocity.x : 0f;
         float velY = rb != null ? rb.linearVelocity.y : 0f;
         bool isGameOver = player != null && player.isGameOver;
         bool isFalling = player != null && player.playerIsFalling;
@@ -161,6 +217,22 @@ public class PlayerAnimationController : MonoBehaviour
 
         bool isBoosted = player != null && player.isCommitTriggered;
 
+        // Running: strictly grounded horizontal movement
+        bool isRunning = isGrounded && Mathf.Abs(velX) > 0.2f && !isGameOver && !isDeathFalling && landTimer <= 0f;
+
+        // Flip sprite based on horizontal movement
+        if (sr != null && !isGameOver && !isDeathFalling)
+        {
+            if (velX > 0.2f)
+            {
+                sr.flipX = false;
+            }
+            else if (velX < -0.2f)
+            {
+                sr.flipX = true;
+            }
+        }
+
         // Update Animator parameters
         if (anim != null && anim.runtimeAnimatorController != null)
         {
@@ -169,6 +241,7 @@ public class PlayerAnimationController : MonoBehaviour
             anim.SetBool("IsBoosted", isBoosted);
             anim.SetBool("IsDeathFalling", isDeathFalling);
             anim.SetBool("IsGameOverFloor", isLyingDown);
+            anim.SetBool("IsRunning", isRunning);
         }
 
         // =========================================================================
@@ -212,7 +285,6 @@ public class PlayerAnimationController : MonoBehaviour
         {
             // Smooth head-down dive ONLY during death/game-over fall
             float fallProgress = Mathf.Clamp01(-velY / 10f);
-            float velX = rb != null ? rb.linearVelocity.x : 0f;
             float baseDiveAngle = velX < -0.1f ? maxDiveAngle : -maxDiveAngle;
             targetAngle = Mathf.Lerp(0f, baseDiveAngle, fallProgress);
             currentZAngle = Mathf.Lerp(currentZAngle, targetAngle, Time.deltaTime * tiltSmoothSpeed);
@@ -262,9 +334,30 @@ public class PlayerAnimationController : MonoBehaviour
                     landTimer -= Time.deltaTime;
                     if (landSprite != null) sr.sprite = landSprite;
                 }
+                else if (isRunning)
+                {
+                    // PRIORITY 6: Grounded running animation cycle
+                    runTimer += Time.deltaTime * runCycleSpeed;
+                    if (runTimer >= 1f)
+                    {
+                        runTimer -= 1f;
+                        int frameCount = runSprites != null && runSprites.Length > 0 ? runSprites.Length : 4;
+                        currentRunFrame = (currentRunFrame + 1) % frameCount;
+                    }
+                    if (runSprites != null && runSprites.Length > currentRunFrame && runSprites[currentRunFrame] != null)
+                    {
+                        sr.sprite = runSprites[currentRunFrame];
+                    }
+                    else if (idleSprite != null)
+                    {
+                        sr.sprite = idleSprite;
+                    }
+                }
                 else
                 {
-                    // PRIORITY 6: Idle approved breathing loop
+                    // PRIORITY 7: Idle approved breathing loop
+                    currentRunFrame = 0;
+                    runTimer = 0f;
                     idleTimer += Time.deltaTime;
                     if (idleTimer >= idleCycleDuration)
                     {
@@ -281,6 +374,12 @@ public class PlayerAnimationController : MonoBehaviour
                         sr.sprite = idleSprite;
                     }
                 }
+            }
+
+            // Absolute visibility guarantee: SpriteRenderer must never be null
+            if (sr.sprite == null)
+            {
+                if (idleSprite != null) sr.sprite = idleSprite;
             }
         }
 

@@ -6355,6 +6355,13 @@ MonoBehaviour:
   fallSprite: {fileID: 1003, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
   landSprite: {fileID: 1004, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
   lieDownSprite: {fileID: 1006, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  lieDownRestSprite: {fileID: 1015, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  runSprites:
+  - {fileID: 1010, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  - {fileID: 1011, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  - {fileID: 1012, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  - {fileID: 1013, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
+  runCycleSpeed: 10
   landDuration: 0.14
   idleCycleDuration: 0.8
   bugVibrationDuration: 0.4

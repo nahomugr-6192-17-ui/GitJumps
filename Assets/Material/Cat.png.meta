@@ -23,6 +23,24 @@ TextureImporter:
   - first:
       213: 1006
     second: Cat_LieDown
+  - first:
+      213: 1010
+    second: Cat_Run_0
+  - first:
+      213: 1011
+    second: Cat_Run_1
+  - first:
+      213: 1012
+    second: Cat_Run_2
+  - first:
+      213: 1013
+    second: Cat_Run_3
+  - first:
+      213: 1014
+    second: Cat_LieDown_2
+  - first:
+      213: 1015
+    second: Cat_LieDown_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +70,7 @@ TextureImporter:
   cubemapConvolution: 0
   seamlessCubemap: 0
   textureFormat: 1
-  maxTextureSize: 2048
+  maxTextureSize: 4096
   textureSettings:
     serializedVersion: 2
     filterMode: 1
@@ -90,7 +108,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -103,7 +121,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Standalone
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -116,7 +134,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Android
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -129,7 +147,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -181,7 +199,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f80403be17ce0ab90800000000000001
+      spriteID: 9e300000000000000800000000000000
       internalID: 1001
       vertices: []
       indices: 
@@ -203,7 +221,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f80403be17ce0ab90800000000000002
+      spriteID: ae300000000000000800000000000000
       internalID: 1002
       vertices: []
       indices: 
@@ -225,7 +243,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f80403be17ce0ab90800000000000003
+      spriteID: be300000000000000800000000000000
       internalID: 1003
       vertices: []
       indices: 
@@ -247,7 +265,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f80403be17ce0ab90800000000000004
+      spriteID: ce300000000000000800000000000000
       internalID: 1004
       vertices: []
       indices: 
@@ -269,7 +287,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f80403be17ce0ab90800000000000005
+      spriteID: de300000000000000800000000000000
       internalID: 1005
       vertices: []
       indices: 
@@ -291,8 +309,140 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f80403be17ce0ab90800000000000006
+      spriteID: ee300000000000000800000000000000
       internalID: 1006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cat_Run_0
+      rect:
+        serializedVersion: 2
+        x: 1792
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f300000000000000800000000000000
+      internalID: 1010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cat_Run_1
+      rect:
+        serializedVersion: 2
+        x: 2048
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f300000000000000800000000000000
+      internalID: 1011
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cat_Run_2
+      rect:
+        serializedVersion: 2
+        x: 2304
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f300000000000000800000000000000
+      internalID: 1012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cat_Run_3
+      rect:
+        serializedVersion: 2
+        x: 2560
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f300000000000000800000000000000
+      internalID: 1013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cat_LieDown_2
+      rect:
+        serializedVersion: 2
+        x: 2816
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f300000000000000800000000000000
+      internalID: 1014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cat_LieDown_3
+      rect:
+        serializedVersion: 2
+        x: 3072
+        y: 0
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f300000000000000800000000000000
+      internalID: 1015
       vertices: []
       indices: 
       edges: []
@@ -312,12 +462,18 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       Cat_0: -7232521027535748977
+      Cat_Fall: 1003
       Cat_Idle_1: 1001
       Cat_Jump: 1002
-      Cat_Fall: 1003
-      Cat_Land: 1004
       Cat_Jump_Boost: 1005
+      Cat_Land: 1004
       Cat_LieDown: 1006
+      Cat_LieDown_2: 1014
+      Cat_LieDown_3: 1015
+      Cat_Run_0: 1010
+      Cat_Run_1: 1011
+      Cat_Run_2: 1012
+      Cat_Run_3: 1013
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

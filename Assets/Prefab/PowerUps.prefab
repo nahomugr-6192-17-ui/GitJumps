@@ -223,13 +223,13 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9fa5bfb6ba1d2d54d84d92f106bee924, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
+  m_EditorClassIdentifier: Assembly-CSharp::powerUpsMovementScript
   spawnerController: {fileID: 0}
   playerScript: {fileID: 0}
   moveHorizontally: 0
   horizontalSpeed: 3
-  minX: -8
-  maxX: 8
+  minX: -14
+  maxX: 14
 --- !u!1 &6319637249948448487
 GameObject:
   m_ObjectHideFlags: 0

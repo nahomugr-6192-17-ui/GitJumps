@@ -14,8 +14,8 @@ public class platformSpawnerScript : MonoBehaviour
     [Header("PowerUp Spawning")]
     public GameObject powerUpsPrefab;
 
-    public float powerUpMinX = -5f;
-    public float powerUpMaxX = 5f;
+    public float powerUpMinX = -14f;
+    public float powerUpMaxX = 14f;
 
     public float minPowerUpGap = 7f;
     public float maxPowerUpGap = 10f;
@@ -24,7 +24,7 @@ public class platformSpawnerScript : MonoBehaviour
     private float nextPowerUpGap;
 
     [Header("Platform Speed")]
-    public float basePlatformSpeed = 0.6f;
+    public float basePlatformSpeed = 0.75f;
 
     [Header("Temporary Speed Boost")]
     public float speedBoostMultiplier = 5f;
@@ -46,7 +46,7 @@ public class platformSpawnerScript : MonoBehaviour
     public GameObject LandingBlock;
 
     [Header("PowerUp Horizontal Movement")]
-    public int minStationaryPowerUps = 2;
+    public int minStationaryPowerUps = 1;
     public int maxStationaryPowerUps = 4;
 
     private int stationaryPowerUpCount = 0;

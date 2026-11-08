@@ -240,7 +240,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 11177087}
   serializedVersion: 8
-  lengthInSec: 1
+  lengthInSec: 1.3
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -1069,7 +1069,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 25
+      scalar: 35
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -5122,17 +5122,17 @@ MonoBehaviour:
   spawner: {fileID: 169303445}
   playerScript: {fileID: 1523750183}
   powerUpsPrefab: {fileID: 3884415145978387781, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
-  powerUpMinX: -5
-  powerUpMaxX: 5
+  powerUpMinX: -14
+  powerUpMaxX: 14
   minPowerUpGap: 7
   maxPowerUpGap: 10
-  basePlatformSpeed: 0.95
+  basePlatformSpeed: 0.75
   speedBoostMultiplier: 5
   speedBoostDuration: 0.001
   platformSpeedCoolingRate: 1
   Destroyer: {fileID: 501061539}
   LandingBlock: {fileID: 1598638660}
-  minStationaryPowerUps: 2
+  minStationaryPowerUps: 1
   maxStationaryPowerUps: 4
 --- !u!1 &208407128
 GameObject:
@@ -6205,8 +6205,8 @@ MonoBehaviour:
   horizontalAcceleration: 35
   horizontalDeceleration: 45
   jumpCutMultiplier: 0.5
-  commitJumpMultiplier: 2
-  commitBoostDuration: 1.2
+  commitJumpMultiplier: 1.3
+  commitBoostDuration: 0.95
   Commit: {fileID: 8149861642825298336}
   Bug: {fileID: 3710025063451728636}
   isCommitTriggered: 0
@@ -6347,7 +6347,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4e5f6a1b2c30718293a4b5c6d7e8f01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimationController
-  visualTransform: {fileID: 0}
+  visualTransform: {fileID: 1523750190}
   idleSprite: {fileID: -7232521027535748977, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
   idleBreatheSprite: {fileID: 1001, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
   jumpSprite: {fileID: 1002, guid: ab51f9f031be18448ac143eb057fbd32, type: 3}
@@ -6741,9 +6741,21 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6442892758487758030, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: maxX
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 6442892758487758030, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: minX
+      value: -14
+      objectReference: {fileID: 0}
+    - target: {fileID: 6442892758487758030, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: playerScript
       value: 
       objectReference: {fileID: 1523750183}
+    - target: {fileID: 6442892758487758030, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
+      propertyPath: horizontalSpeed
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 6442892758487758030, guid: 7b7b630deb2935641ac19740289fee94, type: 3}
       propertyPath: spawnerController
       value: 

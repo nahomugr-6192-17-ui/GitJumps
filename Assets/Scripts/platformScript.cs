@@ -1,4 +1,4 @@
-
+﻿
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -15,8 +15,8 @@ public class platformScript : MonoBehaviour
 
     [Header("Horizontal Movement")]
     public float horizontalSpeed = 3f;
-    public float minX = -8f;
-    public float maxX = 8f;
+    public float minX = -12f;
+    public float maxX = 12f;
 
     private GameObject activePlatform;
     private int horizontalDirection = 1;

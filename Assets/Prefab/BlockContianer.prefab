@@ -53,8 +53,8 @@ MonoBehaviour:
   player: {fileID: 0}
   numberOfPlatforms: 4
   horizontalSpeed: 3
-  minX: -8
-  maxX: 8
+  minX: -12
+  maxX: 12
   playerScript: {fileID: 0}
   spawnerController: {fileID: 0}
 --- !u!61 &2461689199220366716
@@ -241,8 +241,8 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.81, y: 0.2}
-  m_EdgeRadius: 0
+  m_Size: {x: 3.2, y: 0.2}
+  m_EdgeRadius: 0.009
 --- !u!251 &7666152112172182860
 PlatformEffector2D:
   m_ObjectHideFlags: 0
@@ -259,7 +259,7 @@ PlatformEffector2D:
   m_UseOneWay: 1
   m_UseOneWayGrouping: 0
   m_SurfaceArc: 180
-  m_UseSideFriction: 0
+  m_UseSideFriction: 1
   m_UseSideBounce: 0
   m_SideArc: 1
 --- !u!1 &6322095953606781341
@@ -400,8 +400,8 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.81, y: 0.2}
-  m_EdgeRadius: 0
+  m_Size: {x: 3.2, y: 0.2}
+  m_EdgeRadius: 0.009
 --- !u!251 &3365245375877968859
 PlatformEffector2D:
   m_ObjectHideFlags: 0
@@ -418,7 +418,7 @@ PlatformEffector2D:
   m_UseOneWay: 1
   m_UseOneWayGrouping: 0
   m_SurfaceArc: 180
-  m_UseSideFriction: 0
+  m_UseSideFriction: 1
   m_UseSideBounce: 0
   m_SideArc: 1
 --- !u!1 &6414559074832011958
@@ -559,8 +559,8 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.81, y: 0.2}
-  m_EdgeRadius: 0
+  m_Size: {x: 3.2, y: 0.2}
+  m_EdgeRadius: 0.009
 --- !u!251 &7209946280581149590
 PlatformEffector2D:
   m_ObjectHideFlags: 0
@@ -577,7 +577,7 @@ PlatformEffector2D:
   m_UseOneWay: 1
   m_UseOneWayGrouping: 0
   m_SurfaceArc: 180
-  m_UseSideFriction: 0
+  m_UseSideFriction: 1
   m_UseSideBounce: 0
   m_SideArc: 1
 --- !u!1 &8022251168148604542
@@ -718,8 +718,8 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.81, y: 0.2}
-  m_EdgeRadius: 0
+  m_Size: {x: 3.2, y: 0.2}
+  m_EdgeRadius: 0.009
 --- !u!251 &8405182671874917639
 PlatformEffector2D:
   m_ObjectHideFlags: 0
@@ -736,6 +736,6 @@ PlatformEffector2D:
   m_UseOneWay: 1
   m_UseOneWayGrouping: 0
   m_SurfaceArc: 180
-  m_UseSideFriction: 0
+  m_UseSideFriction: 1
   m_UseSideBounce: 0
   m_SideArc: 1

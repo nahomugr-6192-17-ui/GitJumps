@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
@@ -32,7 +32,7 @@ public class playerScript : MonoBehaviour
 
     private bool jumpWasHeld;
     [Header("Commit Boost")]
-    public float commitJumpMultiplier = 3f;
+    public float commitJumpMultiplier = 1.3f;
     public float commitBoostDuration = 0.95f;
 
     private float defaultJumpForceMultiplier;
@@ -399,15 +399,15 @@ public class playerScript : MonoBehaviour
             if (jumpCount == 3)
             {
                 spawnerController.TriggerPlatformSpeedBoost(
-                    4f,
+                    5f,
                     0.45f
                 );
             }
 
-            if (currentScore <= 50 && currentScore >= 3)
+            if (currentScore <= 60 && currentScore >= 3)
             {
                 spawnerController.TriggerPlatformSpeedBoost(
-                    4f,
+                    4.8f,
                     0.5f
                 );
             }
@@ -460,7 +460,7 @@ public class playerScript : MonoBehaviour
 
             ActivateCommitBoost();
             spawnerController.TriggerPlatformSpeedBoost(
-                5f,
+                5.5f,
                 1f
             );
 

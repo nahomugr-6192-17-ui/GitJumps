@@ -5134,6 +5134,13 @@ MonoBehaviour:
   LandingBlock: {fileID: 1598638660}
   minStationaryPowerUps: 1
   maxStationaryPowerUps: 4
+  starPrefab: {fileID: 2547161243685874472, guid: a35f17d59d2679b46bc9eb84d0e3fe0a, type: 3}
+  starSpawnInterval: 0.5
+  starMinX: -16.5
+  starMaxX: 16.5
+  starSpawnY: 11.5
+  initialStarCount: 28
+  starSpeedOffset: 1
 --- !u!1 &208407128
 GameObject:
   m_ObjectHideFlags: 0

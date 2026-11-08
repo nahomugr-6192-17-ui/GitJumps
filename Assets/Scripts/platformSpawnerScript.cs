@@ -52,6 +52,17 @@ public class platformSpawnerScript : MonoBehaviour
     private int stationaryPowerUpCount = 0;
     private int nextMovingPowerUpCount;
 
+    [Header("Star Background")]
+    public GameObject starPrefab;
+    public float starSpawnInterval = 0.5f;
+    public float starMinX = -16.5f;
+    public float starMaxX = 16.5f;
+    public float starSpawnY = 11.5f;
+    public int initialStarCount = 28;
+    public float starSpeedOffset = 1f;
+    private float starSpawnTimer = 0f;
+    private Transform starContainer;
+
     public float CurrentPlatformSpeed
     {
         get
@@ -109,6 +120,16 @@ public class platformSpawnerScript : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        if (starPrefab == null)
+        {
+#if UNITY_EDITOR
+            starPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/Star.prefab");
+#endif
+        }
+    }
+
     private void Start()
     {
         if (playerScript == null)
@@ -119,6 +140,8 @@ public class platformSpawnerScript : MonoBehaviour
         RandomizePowerUpHierarchy();
 
         nextMovingPowerUpCount = Random.Range(minStationaryPowerUps, maxStationaryPowerUps + 1);
+
+        PrewarmStars();
     }
 
     private void RandomizePowerUpHierarchy()
@@ -157,6 +180,9 @@ public class platformSpawnerScript : MonoBehaviour
         // Destroy containers independently of spawning.
         DestroyBlockContainer();
         DestroyPowerUpContainer();
+
+        // Update star spawning continuously across all game states.
+        UpdateStarSpawning();
 
         if (playerScript == null)
             return;
@@ -448,5 +474,81 @@ public class platformSpawnerScript : MonoBehaviour
         }
 
         return assignedValue;
+    }
+
+    // --------------------------------
+    // STAR BACKGROUND SPAWNING
+    // --------------------------------
+
+    private void EnsureStarContainer()
+    {
+        if (starContainer == null)
+        {
+            GameObject container = GameObject.Find("StarContainer");
+            if (container == null)
+            {
+                container = new GameObject("StarContainer");
+            }
+            starContainer = container.transform;
+        }
+    }
+
+    private void PrewarmStars()
+    {
+        if (starPrefab == null)
+            return;
+
+        EnsureStarContainer();
+
+        for (int i = 0; i < initialStarCount; i++)
+        {
+            float randX = Random.Range(starMinX, starMaxX);
+            float randY = Random.Range(-9.5f, 10.5f);
+            SpawnStarAtPosition(new Vector3(randX, randY, 0f));
+        }
+    }
+
+    private void UpdateStarSpawning()
+    {
+        if (starPrefab == null)
+            return;
+
+        starSpawnTimer += Time.deltaTime;
+
+        // When moving faster (Commit boost or higher scores), spawn proportionally to maintain spatial density.
+        float starSpeed = CurrentPlatformSpeed + starSpeedOffset;
+        float baseStarSpeed = basePlatformSpeed + starSpeedOffset;
+        float speedRatio = starSpeed / Mathf.Max(0.1f, baseStarSpeed);
+        float effectiveInterval = starSpawnInterval / Mathf.Max(0.5f, speedRatio);
+
+        if (starSpawnTimer >= effectiveInterval)
+        {
+            starSpawnTimer = 0f;
+            EnsureStarContainer();
+
+            float randX = Random.Range(starMinX, starMaxX);
+            // Slight Y jitter so stars enter naturally at varied heights
+            float randY = starSpawnY + Random.Range(0f, 1.0f);
+            SpawnStarAtPosition(new Vector3(randX, randY, 0f));
+        }
+    }
+
+    private void SpawnStarAtPosition(Vector3 position)
+    {
+        GameObject starObj = Instantiate(
+            starPrefab,
+            position,
+            Quaternion.identity,
+            starContainer
+        );
+
+        float scale = Random.Range(0.8f, 1.2f);
+        starObj.transform.localScale = new Vector3(scale, scale, 1f);
+
+        starScript star = starObj.GetComponent<starScript>();
+        if (star != null)
+        {
+            star.Initialize(this);
+        }
     }
 }

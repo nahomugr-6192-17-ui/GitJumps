@@ -75,9 +75,8 @@ public class HomeSceenScript : MonoBehaviour
             Keyboard.current.upArrowKey.isPressed;
 
         bool jumpPressed =
-            Keyboard.current.spaceKey.wasPressedThisFrame ||
-            Keyboard.current.wKey.wasPressedThisFrame ||
-            Keyboard.current.upArrowKey.wasPressedThisFrame;
+            Keyboard.current.wKey.isPressed ||
+            Keyboard.current.upArrowKey.isPressed;
 
         // Smooth horizontal acceleration and deceleration.
         float targetSpeed = 0f;
@@ -127,7 +126,7 @@ public class HomeSceenScript : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         // The home screen player can jump only when touching the ground.
-        if (collision.gameObject.CompareTag("Floor"))
+        if (collision.gameObject.CompareTag("Floor") || collision.gameObject.CompareTag("Platform"))
         {
             foreach (ContactPoint2D contact in collision.contacts)
             {

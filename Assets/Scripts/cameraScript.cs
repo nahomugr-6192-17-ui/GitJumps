@@ -90,16 +90,28 @@ public class cameraScript : MonoBehaviour
         // --------------------------------
         float targetY;
 
-        if (playerIsFalling)
+        if (playerIsFalling || player.transform.position.y <= -15f)
         {
             targetY = fallCameraY;
+
             playerScript = player.GetComponent<playerScript>();
             if (playerScript != null)
             {
                 playerScript.isGameOver = true;
                 playerScript.playerIsFalling = true;
             }
+            ground.transform.position = new Vector3(
+                   ground.transform.position.x,
+                   fallGroundY,
+                   ground.transform.position.z
+               );
+            ground.transform.localScale = new Vector3(
+                    36f,
+                    ground.transform.localScale.y,
+                    ground.transform.localScale.z
+                );
         }
+        
         else if (cameraLocked)
         {
             targetY = gameplayCameraY;

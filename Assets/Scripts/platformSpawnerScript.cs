@@ -24,7 +24,7 @@ public class platformSpawnerScript : MonoBehaviour
     private float nextPowerUpGap;
 
     [Header("Platform Speed")]
-    public float basePlatformSpeed = 0.75f;
+    public float basePlatformSpeed = 0.88f;
 
     [Header("Temporary Speed Boost")]
     public float speedBoostMultiplier = 5f;

@@ -70,6 +70,13 @@ public class playerScript : MonoBehaviour
     private Label currentScoreLabel;
     private bool isSprintBlockerActive = true;
     private GameObject sprintBlocker;
+    public UIDocument gameOverUI;
+    private Label CurrentScoreGameOver;
+    private Label BestScore;
+    private Button RestartButton;
+    private Button HomeButton;
+    private bool gameOverHandled = false;
+    private bool gameOverUIShown = false;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -78,12 +85,21 @@ public class playerScript : MonoBehaviour
         currentScoreLabel = currentScoreUI.rootVisualElement.Q<Label>("currentScoreLabel");
         currentScore = 0;
         currentScoreLabel.text = "Score: " + currentScore.ToString();
+        highScore = PlayerPrefs.GetInt("HighScore", 0);
         spawnerController = FindAnyObjectByType<platformSpawnerScript>();
         defaultJumpForceMultiplier = jumpForceMultiplier;
         playerSprite = GetComponentInChildren<SpriteRenderer>();
         if (playerSprite != null) originalPlayerColor = playerSprite.color;
         playerCollider = GetComponent<Collider2D>();
         sprintBlocker = GameObject.FindWithTag("SprintBlocker");
+
+
+        CurrentScoreGameOver = gameOverUI.rootVisualElement.Q<Label>("CurrentScoreGameOver");
+        BestScore = gameOverUI.rootVisualElement.Q<Label>("BestScore");
+        RestartButton = gameOverUI.rootVisualElement.Q<Button>("RestartButton");
+        HomeButton = gameOverUI.rootVisualElement.Q<Button>("HomeButton");
+        RestartButton.clicked += RestartGame;
+        HomeButton.clicked += GoHome;
     }
 
     // Update is called once per frame
@@ -149,6 +165,15 @@ public class playerScript : MonoBehaviour
         );
         Debug.Log("Distance between boosters: " + distanceBetweenBoosters);
         */
+
+        if (gameOverUIShown == true)
+        {
+            gameOverUI.rootVisualElement.style.display = DisplayStyle.Flex;
+        }
+        else
+        {
+            gameOverUI.rootVisualElement.style.display = DisplayStyle.None;
+        }
         ActivateSprintBlocker();
         GameOver();
         UpdateGameOverTrigger();
@@ -429,11 +454,6 @@ public class playerScript : MonoBehaviour
             if (scoredContainers.Add(collision.gameObject))
             {
                 currentScore++;
-                /*if (currentScore > highScore)
-                {
-                    highScore = currentScore;
-                    PlayerPrefs.SetInt("HighScore", highScore);
-                }*/
                 PlayerPrefs.SetInt("Score", currentScore);
                 currentScoreLabel.text = "Score: " + currentScore.ToString();
             }
@@ -525,7 +545,7 @@ public class playerScript : MonoBehaviour
 
     }
 
-    void ActivateSprintBlocker()
+    private void ActivateSprintBlocker()
     {
         if (sprintBlocker == null) return;
         sprintBlocker.SetActive(isSprintBlockerActive);
@@ -570,7 +590,7 @@ public class playerScript : MonoBehaviour
 
 
 
-    void BugCollision()
+    private void BugCollision()
     {
         if (bugFlashCoroutine != null)
         {
@@ -617,7 +637,7 @@ public class playerScript : MonoBehaviour
         PlayerAnimationController animCtrl = GetComponent<PlayerAnimationController>();
         if (animCtrl != null) animCtrl.TriggerLieDown();
     }
-    void UpdateGameOverTrigger()
+    private void UpdateGameOverTrigger()
     {
         if (!isGameOver || playerCollider == null)
             return;
@@ -636,15 +656,56 @@ public class playerScript : MonoBehaviour
         }
     }
 
-    void GameOver()
+
+    private void GameOver()
     {
-        if (!isGameOver)
+        if (!isGameOver || gameOverHandled)
             return;
+
+        // Wait until the player reaches the Game Over display height.
+        if (transform.position.y > -36f)
+            return;
+
+        gameOverHandled = true;
+        gameOverUIShown = true;
+        currentScoreUI.rootVisualElement.style.display = DisplayStyle.None;
 
         if (spawnerController != null)
         {
             spawnerController.basePlatformSpeed = 0f;
-            buttonsEnabled = false;
         }
+
+        buttonsEnabled = false;
+
+        GameOverScenes();
+    }
+
+
+    private void GameOverScenes()
+    {
+        CurrentScoreGameOver.text = currentScore.ToString();
+        if (currentScore > highScore)
+        {
+            highScore = currentScore;
+            PlayerPrefs.SetInt("HighScore", highScore);
+            PlayerPrefs.Save();
+        }
+        BestScore.text = "Best: " + highScore.ToString();
+    }
+
+    private void RestartGame()
+    {
+        Time.timeScale = 1f;
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
+        );
+    }
+
+    private void GoHome()
+    {
+        Time.timeScale = 1f;
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("HomeScene");
     }
 }

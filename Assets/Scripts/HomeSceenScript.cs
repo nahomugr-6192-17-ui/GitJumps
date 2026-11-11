@@ -8,9 +8,11 @@ public class HomeSceenScript : MonoBehaviour
     [Header("Home Scene UI")]
     public UIDocument HomeScene;
 
-    private Label PlayButton;
-    private Label HowToButton;
-    private Label QuitButton;
+    private Button PlayButton;
+    private Button HowToButton;
+    private Button QuitButton;
+
+    private const string TutorialCompletedKey = "HasCompletedHowToPlay";
 
     [Header("Player Movement")]
     public Rigidbody2D playerRb;
@@ -30,28 +32,17 @@ public class HomeSceenScript : MonoBehaviour
     private bool jumpWasHeld;
     private bool isGrounded;
 
+
     void Start()
     {
         // Register UI button callbacks once.
-        PlayButton = HomeScene.rootVisualElement.Q<Label>("PlayButton");
-        HowToButton = HomeScene.rootVisualElement.Q<Label>("HowToButton");
-        QuitButton = HomeScene.rootVisualElement.Q<Label>("QuitButton");
+        PlayButton = HomeScene.rootVisualElement.Q<Button>("PlayButton");
+        HowToButton = HomeScene.rootVisualElement.Q<Button>("HowToButton");
+        QuitButton = HomeScene.rootVisualElement.Q<Button>("QuitButton");
 
-        if (PlayButton != null)
-            PlayButton.RegisterCallback<ClickEvent>(
-                ev => SceneManager.LoadScene("GamePlayScene"));
-
-        if (HowToButton != null)
-            HowToButton.RegisterCallback<ClickEvent>(
-                ev => SceneManager.LoadScene("HowToPlayScene"));
-
-        if (QuitButton != null)
-            QuitButton.RegisterCallback<ClickEvent>(
-                ev => Application.Quit());
-
-        // Get the Rigidbody2D if it was not assigned in Inspector.
-        if (playerRb == null)
-            Debug.LogWarning("Assign the Home Scene player's Rigidbody2D in the Inspector.");
+        PlayButton.RegisterCallback<ClickEvent>(OnPlayClicked);
+        HowToButton.RegisterCallback<ClickEvent>(OnHowToClicked);
+        QuitButton.RegisterCallback<ClickEvent>(OnQuitClicked);
     }
 
     void Update()
@@ -145,5 +136,30 @@ public class HomeSceenScript : MonoBehaviour
         {
             isGrounded = false;
         }
+    }
+
+    private void OnPlayClicked(ClickEvent ev)
+    {
+        bool tutorialCompleted =
+            PlayerPrefs.GetInt(TutorialCompletedKey, 0) == 1;
+
+        if (tutorialCompleted)
+        {
+            SceneManager.LoadScene("GamePlayScene");
+        }
+        else
+        {
+            SceneManager.LoadScene("HowToPlayScene");
+        }
+    }
+
+    private void OnHowToClicked(ClickEvent ev)
+    {
+        SceneManager.LoadScene("HowToPlayScene");
+    }
+
+    private void OnQuitClicked(ClickEvent ev)
+    {
+        Application.Quit();
     }
 }

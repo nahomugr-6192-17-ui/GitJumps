@@ -1,0 +1,64 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/LeaderboardUI.uss" />
+    <ui:VisualElement name="LeaderboardOverlay" class="leaderboard-overlay" style="display: none;">
+        <ui:VisualElement name="LeaderboardModal" class="leaderboard-modal">
+            <!-- Header Row -->
+            <ui:VisualElement class="leaderboard-header-row">
+                <ui:Label text="GLOBAL LEADERBOARD" class="leaderboard-title" />
+                <ui:Button text="✕" name="LeaderboardCloseButton" class="close-button" />
+            </ui:VisualElement>
+
+            <!-- Personal Profile Area -->
+            <ui:VisualElement name="ProfileArea" class="profile-card">
+                <ui:VisualElement class="profile-player-info">
+                    <ui:Label text="Player Name" name="ProfileDisplayName" class="profile-name" />
+                    <ui:Label text="GJ-0000" name="ProfilePlayerCode" class="profile-code" />
+                </ui:VisualElement>
+                <ui:VisualElement class="profile-stats">
+                    <ui:VisualElement class="profile-stat-item">
+                        <ui:Label text="BEST SCORE" class="profile-stat-label" />
+                        <ui:Label text="0" name="ProfileBestScore" class="profile-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="profile-stat-item">
+                        <ui:Label text="GLOBAL RANK" class="profile-stat-label" />
+                        <ui:Label text="-" name="ProfileGlobalRank" class="profile-stat-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Table Container -->
+            <ui:VisualElement class="table-container">
+                <!-- Fixed Three Columns Table Header -->
+                <ui:VisualElement class="table-header">
+                    <ui:Label text="Display name" class="table-header-col col-name" />
+                    <ui:Label text="Best score" class="table-header-col col-score" />
+                    <ui:Label text="Leaderboard" class="table-header-col col-rank" />
+                </ui:VisualElement>
+
+                <!-- Scrollable Rows Container -->
+                <ui:ScrollView name="LeaderboardScrollView" class="table-scroll" />
+
+                <!-- Loading State -->
+                <ui:VisualElement name="LoadingState" class="status-container" style="display: none;">
+                    <ui:Label text="Loading leaderboard..." class="status-text" />
+                </ui:VisualElement>
+
+                <!-- Error State -->
+                <ui:VisualElement name="ErrorState" class="status-container" style="display: none;">
+                    <ui:Label text="Failed to load leaderboard." name="ErrorMessageLabel" class="status-text status-error-text" />
+                </ui:VisualElement>
+
+                <!-- Empty State -->
+                <ui:VisualElement name="EmptyState" class="status-container" style="display: none;">
+                    <ui:Label text="No scores recorded yet." class="status-text" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Footer Row -->
+            <ui:VisualElement class="leaderboard-footer">
+                <ui:Button text="REFRESH" name="LeaderboardRefreshButton" class="refresh-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
+

@@ -26,11 +26,6 @@ public class playerScript : MonoBehaviour
     public float horizontalAcceleration = 35f;
     public float horizontalDeceleration = 45f;
 
-    [Header("Jump Control")]
-    [Range(0.1f, 1f)]
-    public float jumpCutMultiplier = 0.5f;
-
-    private bool jumpWasHeld;
     [Header("Commit Boost")]
     public float commitJumpMultiplier = 1.3f;
     public float commitBoostDuration = 0.95f;
@@ -75,6 +70,7 @@ public class playerScript : MonoBehaviour
     private Label BestScore;
     private Button RestartButton;
     private Button HomeButton;
+    private Button LeaderboardButton;
     private bool gameOverHandled = false;
     private bool gameOverUIShown = false;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -100,6 +96,12 @@ public class playerScript : MonoBehaviour
         HomeButton = gameOverUI.rootVisualElement.Q<Button>("HomeButton");
         RestartButton.clicked += RestartGame;
         HomeButton.clicked += GoHome;
+
+        LeaderboardButton = gameOverUI.rootVisualElement.Q<Button>("LeaderboardButton");
+        if (LeaderboardButton != null)
+        {
+            LeaderboardButton.clicked += OpenLeaderboard;
+        }
     }
 
     // Update is called once per frame
@@ -149,15 +151,6 @@ public class playerScript : MonoBehaviour
             {
                 Jump();
             }
-
-            // Cut the jump short when the player releases jump
-            // while still moving upward.
-            if (jumpWasHeld && !jumpHeld && rb.linearVelocityY > 0f)
-            {
-                rb.linearVelocityY *= jumpCutMultiplier;
-            }
-
-            jumpWasHeld = jumpHeld;
         }
 
         /*float distanceBetweenBoosters = Mathf.Abs(
@@ -691,6 +684,20 @@ public class playerScript : MonoBehaviour
             PlayerPrefs.Save();
         }
         BestScore.text = "Best: " + highScore.ToString();
+
+        // Submit final score to Supabase Global Leaderboard (if configured)
+        if (GitJumps.Leaderboard.SupabaseLeaderboardManager.Instance != null)
+        {
+            GitJumps.Leaderboard.SupabaseLeaderboardManager.Instance.SubmitScore(currentScore);
+        }
+    }
+
+    private void OpenLeaderboard()
+    {
+        if (GitJumps.Leaderboard.LeaderboardUIController.Instance != null)
+        {
+            GitJumps.Leaderboard.LeaderboardUIController.Instance.ShowLeaderboard();
+        }
     }
 
     private void RestartGame()

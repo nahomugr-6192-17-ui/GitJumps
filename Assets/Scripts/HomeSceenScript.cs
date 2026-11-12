@@ -10,6 +10,7 @@ public class HomeSceenScript : MonoBehaviour
 
     private Button PlayButton;
     private Button HowToButton;
+    private Button LeaderboardButton;
     private Button QuitButton;
 
     private const string TutorialCompletedKey = "HasCompletedHowToPlay";
@@ -38,10 +39,15 @@ public class HomeSceenScript : MonoBehaviour
         // Register UI button callbacks once.
         PlayButton = HomeScene.rootVisualElement.Q<Button>("PlayButton");
         HowToButton = HomeScene.rootVisualElement.Q<Button>("HowToButton");
+        LeaderboardButton = HomeScene.rootVisualElement.Q<Button>("LeaderboardButton");
         QuitButton = HomeScene.rootVisualElement.Q<Button>("QuitButton");
 
         PlayButton.RegisterCallback<ClickEvent>(OnPlayClicked);
         HowToButton.RegisterCallback<ClickEvent>(OnHowToClicked);
+        if (LeaderboardButton != null)
+        {
+            LeaderboardButton.RegisterCallback<ClickEvent>(OnLeaderboardClicked);
+        }
         QuitButton.RegisterCallback<ClickEvent>(OnQuitClicked);
     }
 
@@ -156,6 +162,14 @@ public class HomeSceenScript : MonoBehaviour
     private void OnHowToClicked(ClickEvent ev)
     {
         SceneManager.LoadScene("HowToPlayScene");
+    }
+
+    private void OnLeaderboardClicked(ClickEvent ev)
+    {
+        if (GitJumps.Leaderboard.LeaderboardUIController.Instance != null)
+        {
+            GitJumps.Leaderboard.LeaderboardUIController.Instance.ShowLeaderboard();
+        }
     }
 
     private void OnQuitClicked(ClickEvent ev)

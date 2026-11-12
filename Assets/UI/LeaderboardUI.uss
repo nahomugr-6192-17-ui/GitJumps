@@ -1,0 +1,235 @@
+.leaderboard-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(12, 12, 12, 0.88);
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.leaderboard-modal {
+    width: 680px;
+    max-width: 90%;
+    height: 620px;
+    max-height: 90%;
+    background-color: rgb(28, 28, 28);
+    border-width: 2px;
+    border-color: rgb(75, 75, 75);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.leaderboard-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.leaderboard-title {
+    font-size: 26px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&guid=719e9db23dd4a534bbee8afd8e7c6b81&type=3#MonaSans_SemiExpanded-Medium");
+    -unity-font-style: bold;
+}
+
+.close-button {
+    width: 36px;
+    height: 36px;
+    background-color: rgb(45, 45, 45);
+    color: rgb(220, 220, 220);
+    border-radius: 18px;
+    border-width: 1px;
+    border-color: rgb(100, 100, 100);
+    font-size: 18px;
+    -unity-text-align: middle-center;
+}
+
+.close-button:hover {
+    background-color: rgb(65, 65, 65);
+    color: rgb(255, 255, 255);
+}
+
+/* Personal Profile Area */
+.profile-card {
+    background-color: rgb(38, 38, 38);
+    border-width: 1px;
+    border-color: rgb(85, 85, 85);
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 14px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.profile-player-info {
+    flex-direction: column;
+}
+
+.profile-name {
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&guid=719e9db23dd4a534bbee8afd8e7c6b81&type=3#MonaSans_SemiExpanded-Medium");
+}
+
+.profile-code {
+    font-size: 13px;
+    color: rgb(77, 171, 247);
+    margin-top: 2px;
+}
+
+.profile-stats {
+    flex-direction: row;
+    align-items: center;
+}
+
+.profile-stat-item {
+    margin-left: 20px;
+    align-items: flex-end;
+}
+
+.profile-stat-label {
+    font-size: 11px;
+    color: rgb(160, 160, 160);
+}
+
+.profile-stat-value {
+    font-size: 18px;
+    color: rgb(255, 255, 255);
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&guid=719e9db23dd4a534bbee8afd8e7c6b81&type=3#MonaSans_SemiExpanded-Medium");
+}
+
+/* Three Columns Table */
+.table-container {
+    flex-grow: 1;
+    border-width: 1px;
+    border-color: rgb(60, 60, 60);
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: rgb(22, 22, 22);
+}
+
+.table-header {
+    flex-direction: row;
+    background-color: rgb(40, 40, 40);
+    padding: 8px 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(65, 65, 65);
+}
+
+.table-header-col {
+    color: rgb(180, 180, 180);
+    font-size: 13px;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&guid=719e9db23dd4a534bbee8afd8e7c6b81&type=3#MonaSans_SemiExpanded-Medium");
+}
+
+.col-name {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.col-score {
+    width: 130px;
+    -unity-text-align: middle-right;
+}
+
+.col-rank {
+    width: 120px;
+    -unity-text-align: middle-center;
+}
+
+.table-scroll {
+    flex-grow: 1;
+}
+
+.table-row {
+    flex-direction: row;
+    padding: 8px 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+    align-items: center;
+}
+
+.table-row-even {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.table-row-odd {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.table-row-highlight {
+    background-color: rgba(66, 153, 225, 0.2);
+    border-left-width: 3px;
+    border-left-color: rgb(66, 153, 225);
+}
+
+.row-name-text {
+    color: rgb(240, 240, 240);
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: end;
+}
+
+.row-score-text {
+    color: rgb(255, 255, 255);
+    font-size: 15px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-right;
+}
+
+.row-rank-text {
+    font-size: 16px;
+    -unity-text-align: middle-center;
+    color: rgb(220, 220, 220);
+}
+
+/* Status States */
+.status-container {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.status-text {
+    font-size: 15px;
+    color: rgb(180, 180, 180);
+    -unity-text-align: middle-center;
+}
+
+.status-error-text {
+    color: rgb(255, 107, 107);
+}
+
+/* Footer / Refresh */
+.leaderboard-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.refresh-button {
+    height: 34px;
+    padding-left: 18px;
+    padding-right: 18px;
+    background-color: rgb(55, 55, 55);
+    color: rgb(255, 255, 255);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(120, 120, 120);
+    font-size: 13px;
+}
+
+.refresh-button:hover {
+    background-color: rgb(75, 75, 75);
+}
+

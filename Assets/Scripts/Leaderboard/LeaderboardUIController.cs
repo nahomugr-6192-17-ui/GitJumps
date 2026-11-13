@@ -150,16 +150,28 @@ namespace GitJumps.Leaderboard
             }
             else
             {
-                SetProfileLoadingState();
-                if (SupabaseLeaderboardManager.Instance != null)
+                string authData = SupabaseLeaderboardManager.Instance != null ? SupabaseLeaderboardManager.Instance.GetTelegramAuthData() : null;
+                if (string.IsNullOrEmpty(authData))
                 {
-                    SupabaseLeaderboardManager.Instance.InitializePlayer((res) =>
+                    SetProfileGuestState();
+                }
+                else
+                {
+                    SetProfileLoadingState();
+                    if (SupabaseLeaderboardManager.Instance != null)
                     {
-                        if (res != null && res.player != null)
+                        SupabaseLeaderboardManager.Instance.InitializePlayer((res) =>
                         {
-                            UpdateProfileDisplay(res.player);
-                        }
-                    });
+                            if (res != null && res.player != null)
+                            {
+                                UpdateProfileDisplay(res.player);
+                            }
+                            else
+                            {
+                                SetProfileGuestState();
+                            }
+                        });
+                    }
                 }
             }
 
@@ -203,6 +215,10 @@ namespace GitJumps.Leaderboard
             {
                 UpdateProfileDisplay(response.current_player);
             }
+            else if (SupabaseLeaderboardManager.Instance?.CurrentPlayer == null)
+            {
+                SetProfileGuestState();
+            }
 
             PopulateTable(response.leaderboard);
         }
@@ -212,6 +228,11 @@ namespace GitJumps.Leaderboard
             if (loadingState != null) loadingState.style.display = DisplayStyle.None;
             if (emptyState != null) emptyState.style.display = DisplayStyle.None;
             if (scrollView != null) scrollView.style.display = DisplayStyle.None;
+
+            if (SupabaseLeaderboardManager.Instance?.CurrentPlayer == null)
+            {
+                SetProfileGuestState();
+            }
 
             if (errorState != null)
             {
@@ -241,6 +262,15 @@ namespace GitJumps.Leaderboard
             if (profileDisplayName != null) profileDisplayName.text = "Loading...";
             if (profilePlayerCode != null) profilePlayerCode.text = "GJ-....";
             if (profileBestScore != null) profileBestScore.text = "-";
+            if (profileGlobalRank != null) profileGlobalRank.text = "-";
+        }
+
+        private void SetProfileGuestState(string guestName = "Guest Player")
+        {
+            int localHighScore = PlayerPrefs.GetInt("HighScore", 0);
+            if (profileDisplayName != null) profileDisplayName.text = guestName;
+            if (profilePlayerCode != null) profilePlayerCode.text = "GJ-....";
+            if (profileBestScore != null) profileBestScore.text = localHighScore > 0 ? localHighScore.ToString() : "-";
             if (profileGlobalRank != null) profileGlobalRank.text = "-";
         }
 

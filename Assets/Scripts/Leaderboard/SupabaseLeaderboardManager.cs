@@ -47,7 +47,7 @@ namespace GitJumps.Leaderboard
         public string devDisplayName = "Local Developer";
 
         [Header("Network Settings")]
-        public float requestTimeoutSeconds = 8f;
+        public float requestTimeoutSeconds = 15f;
 
         // Cached States
         public PlayerProfile CurrentPlayer { get; private set; }
@@ -102,7 +102,8 @@ namespace GitJumps.Leaderboard
             string initData = GetTelegramAuthData();
             if (string.IsNullOrEmpty(initData))
             {
-                Debug.LogWarning("[SupabaseLeaderboardManager] No Telegram initData available. Player will operate in guest mode until authenticated.");
+                Debug.Log("[SupabaseLeaderboardManager] No Telegram initData available. Player operating in guest mode.");
+                onComplete?.Invoke(null);
                 return;
             }
 
@@ -131,6 +132,10 @@ namespace GitJumps.Leaderboard
                             OnPlayerProfileUpdated?.Invoke(CurrentPlayer);
                             Debug.Log($"[SupabaseLeaderboardManager] Player authenticated: {CurrentPlayer.display_name} ({CurrentPlayer.player_code}), Rank #{CurrentPlayer.global_rank}");
                         }
+                        else
+                        {
+                            Debug.LogWarning($"[SupabaseLeaderboardManager] InitializePlayer returned error: {response?.error}");
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -139,7 +144,8 @@ namespace GitJumps.Leaderboard
                 }
                 else
                 {
-                    Debug.LogWarning($"[SupabaseLeaderboardManager] InitializePlayer failed: {req.responseCode} - {req.error}\n{req.downloadHandler.text}");
+                    string errDetail = ExtractErrorMessage(req);
+                    Debug.LogWarning($"[SupabaseLeaderboardManager] InitializePlayer failed: {errDetail}");
                 }
 
                 onComplete?.Invoke(response);
@@ -166,11 +172,7 @@ namespace GitJumps.Leaderboard
 
             using (UnityWebRequest req = CreatePostRequest(url, jsonBody))
             {
-                if (!string.IsNullOrEmpty(initData))
-                {
-                    req.SetRequestHeader("x-telegram-init-data", initData);
-                }
-
+                // initData is safely transmitted inside JSON body to prevent browser XHR byte-encoding errors
                 yield return req.SendWebRequest();
 
                 IsFetchingLeaderboard = false;
@@ -211,7 +213,8 @@ namespace GitJumps.Leaderboard
                 }
                 else
                 {
-                    string err = $"Network Error: {req.error}";
+                    string errDetail = ExtractErrorMessage(req);
+                    string err = $"Network Error: {errDetail}";
                     Debug.LogWarning($"[SupabaseLeaderboardManager] FetchLeaderboard failed: {err}");
                     onError?.Invoke(err);
                     OnLeaderboardError?.Invoke(err);
@@ -234,9 +237,9 @@ namespace GitJumps.Leaderboard
             string initData = GetTelegramAuthData();
             if (string.IsNullOrEmpty(initData))
             {
-                Debug.LogWarning("[SupabaseLeaderboardManager] Cannot submit score without Telegram authentication.");
+                Debug.Log("[SupabaseLeaderboardManager] Cannot submit score without Telegram authentication (guest mode).");
                 IsSubmittingScore = false;
-                onError?.Invoke("No Telegram authentication data found.");
+                onError?.Invoke("Score saved locally (Play via Telegram to join global leaderboard).");
                 yield break;
             }
 
@@ -285,11 +288,37 @@ namespace GitJumps.Leaderboard
                 }
                 else
                 {
-                    string err = $"Score submission network error: {req.error}";
+                    string errDetail = ExtractErrorMessage(req);
+                    string err = $"Score submission error: {errDetail}";
                     Debug.LogWarning($"[SupabaseLeaderboardManager] {err}");
                     onError?.Invoke(err);
                 }
             }
+        }
+
+        private string ExtractErrorMessage(UnityWebRequest req)
+        {
+            if (req == null) return "Unknown Error";
+
+            if (req.downloadHandler != null && !string.IsNullOrEmpty(req.downloadHandler.text))
+            {
+                try
+                {
+                    var errObj = JsonUtility.FromJson<ErrorResponse>(req.downloadHandler.text);
+                    if (errObj != null && !string.IsNullOrEmpty(errObj.error))
+                    {
+                        return errObj.error;
+                    }
+                }
+                catch { }
+            }
+
+            if (req.responseCode > 0)
+            {
+                return $"HTTP {req.responseCode} - {req.error}";
+            }
+
+            return !string.IsNullOrEmpty(req.error) ? req.error : "Connection Failed";
         }
 
         private UnityWebRequest CreatePostRequest(string url, string jsonBody)

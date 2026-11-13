@@ -69,12 +69,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c466e6d4530bcb5851166ecd8f61ac93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GitJumps.Leaderboard.SupabaseLeaderboardManager
-  supabaseUrl: https://your-project-id.supabase.co
-  supabaseAnonKey: 
+  supabaseUrl: https://suqrmebduvkeqhshasff.supabase.co
+  supabaseAnonKey: sb_publishable_P9Jkwm8KLreE_EhVWh_Kjg_yRhD8rRK
   isDevelopmentMode: 1
   devTelegramId: 1001
   devDisplayName: Local Developer
-  requestTimeoutSeconds: 8
+  requestTimeoutSeconds: 15
 --- !u!114 &5872078418804053346
 MonoBehaviour:
   m_ObjectHideFlags: 0

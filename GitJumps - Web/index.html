@@ -1,117 +1,120 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=yes, viewport-fit=cover">
-    <title>GitJumps</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-    <!-- Official Telegram Mini App SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  </head>
-  <body>
-    <div id="unity-container">
-      <canvas id="unity-canvas" tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-        <div id="unity-loading-text">Loading GitJumps...</div>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport"
+    content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=yes, viewport-fit=cover">
+  <title>GitJumps</title>
+  <link rel="shortcut icon" href="TemplateData/favicon.ico">
+  <link rel="stylesheet" href="TemplateData/style.css">
+  <!-- Official Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+  <div id="unity-container">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <div id="unity-loading-bar">
+      <div id="unity-logo"></div>
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
       </div>
-      <div id="unity-warning"> </div>
+      <div id="unity-loading-text">Loading GitJumps...</div>
     </div>
-    <script>
-      // ==========================================
-      // TELEGRAM MINI APP INITIALIZATION & FULLSCREEN
-      // ==========================================
-      var isTelegram = false;
-      var tg = null;
+    <div id="unity-warning"> </div>
+  </div>
+  <script>
+    // ==========================================
+    // TELEGRAM MINI APP INITIALIZATION & FULLSCREEN
+    // ==========================================
+    var isTelegram = false;
+    var tg = null;
 
+    try {
+      if (window.Telegram && window.Telegram.WebApp) {
+        tg = window.Telegram.WebApp;
+        isTelegram = true;
+      }
+    } catch (e) {
+      console.warn("Telegram WebApp detection error:", e);
+    }
+
+    if (isTelegram && tg) {
       try {
-        if (window.Telegram && window.Telegram.WebApp) {
-          tg = window.Telegram.WebApp;
-          isTelegram = true;
-        }
-      } catch (e) {
-        console.warn("Telegram WebApp detection error:", e);
-      }
+        // Immediately notify Telegram that the initial UI is ready
+        tg.ready();
 
-      if (isTelegram && tg) {
+        // Expand Mini App to fill available height
+        if (typeof tg.expand === "function") {
+          tg.expand();
+        }
+
+        // Request official fullscreen (Telegram Bot API 8.0+)
+        if (typeof tg.requestFullscreen === "function") {
+          tg.requestFullscreen();
+        }
+
+        // Disable vertical swipe-to-close gesture during active mobile gameplay
+        if (typeof tg.disableVerticalSwipes === "function") {
+          tg.disableVerticalSwipes();
+        }
+
+        // Set branded dark header and background colors matching GitJumps theme
+        if (typeof tg.setHeaderColor === "function") {
+          tg.setHeaderColor("#0b0f19");
+        }
+        if (typeof tg.setBackgroundColor === "function") {
+          tg.setBackgroundColor("#0b0f19");
+        }
+
+        // Event listeners for viewport & fullscreen state changes
+        if (typeof tg.onEvent === "function") {
+          tg.onEvent("fullscreenChanged", function () {
+            resizeCanvas();
+          });
+
+          tg.onEvent("fullscreenFailed", function (error) {
+            console.warn("Telegram requestFullscreen failed:", error);
+            if (typeof tg.expand === "function") {
+              tg.expand();
+            }
+            resizeCanvas();
+          });
+
+          tg.onEvent("viewportChanged", function (state) {
+            resizeCanvas();
+          });
+        }
+      } catch (err) {
+        console.warn("Telegram WebApp initialization error:", err);
+      }
+    }
+
+    // Fallback: If Telegram requires a user interaction gesture for fullscreen
+    function tryFullscreenOnUserGesture() {
+      if (isTelegram && tg && typeof tg.requestFullscreen === "function" && !tg.isFullscreen) {
         try {
-          // Immediately notify Telegram that the initial UI is ready
-          tg.ready();
-
-          // Expand Mini App to fill available height
-          if (typeof tg.expand === "function") {
-            tg.expand();
-          }
-
-          // Request official fullscreen (Telegram Bot API 8.0+)
-          if (typeof tg.requestFullscreen === "function") {
-            tg.requestFullscreen();
-          }
-
-          // Disable vertical swipe-to-close gesture during active mobile gameplay
-          if (typeof tg.disableVerticalSwipes === "function") {
-            tg.disableVerticalSwipes();
-          }
-
-          // Set branded dark header and background colors matching GitJumps theme
-          if (typeof tg.setHeaderColor === "function") {
-            tg.setHeaderColor("#0b0f19");
-          }
-          if (typeof tg.setBackgroundColor === "function") {
-            tg.setBackgroundColor("#0b0f19");
-          }
-
-          // Event listeners for viewport & fullscreen state changes
-          if (typeof tg.onEvent === "function") {
-            tg.onEvent("fullscreenChanged", function() {
-              resizeCanvas();
-            });
-
-            tg.onEvent("fullscreenFailed", function(error) {
-              console.warn("Telegram requestFullscreen failed:", error);
-              if (typeof tg.expand === "function") {
-                tg.expand();
-              }
-              resizeCanvas();
-            });
-
-            tg.onEvent("viewportChanged", function(state) {
-              resizeCanvas();
-            });
-          }
-        } catch (err) {
-          console.warn("Telegram WebApp initialization error:", err);
-        }
+          tg.requestFullscreen();
+        } catch (e) { }
       }
+    }
+    window.addEventListener("click", tryFullscreenOnUserGesture, { passive: true, once: true });
+    window.addEventListener("touchstart", tryFullscreenOnUserGesture, { passive: true, once: true });
 
-      // Fallback: If Telegram requires a user interaction gesture for fullscreen
-      function tryFullscreenOnUserGesture() {
-        if (isTelegram && tg && typeof tg.requestFullscreen === "function" && !tg.isFullscreen) {
-          try {
-            tg.requestFullscreen();
-          } catch(e) {}
-        }
-      }
-      window.addEventListener("click", tryFullscreenOnUserGesture, { passive: true, once: true });
-      window.addEventListener("touchstart", tryFullscreenOnUserGesture, { passive: true, once: true });
+    // ==========================================
+    // ADAPTIVE VIEWPORT & CANVAS SIZING
+    // ==========================================
+    var canvas = document.querySelector("#unity-canvas");
+    var container = document.querySelector("#unity-container");
+    var loadingBar = document.querySelector("#unity-loading-bar");
+    var progressBarFull = document.querySelector("#unity-progress-bar-full");
+    var loadingText = document.querySelector("#unity-loading-text");
 
-      // ==========================================
-      // ADAPTIVE VIEWPORT & CANVAS SIZING
-      // ==========================================
-      var canvas = document.querySelector("#unity-canvas");
-      var container = document.querySelector("#unity-container");
-      var loadingBar = document.querySelector("#unity-loading-bar");
-      var progressBarFull = document.querySelector("#unity-progress-bar-full");
-      var loadingText = document.querySelector("#unity-loading-text");
-
-      function getViewportDimensions() {
-        var w = window.innerWidth || document.documentElement.clientWidth || 360;
-        var h = window.innerHeight || document.documentElement.clientHeight || 640;
+    function getViewportDimensions() {
+      var w = window.innerWidth || document.documentElement.clientWidth || 360;
+      var h = window.innerHeight || document.documentElement.clientHeight || 640;
 
         if (isTelegram && tg && tg.viewportHeight && tg.viewportHeight > 0) {
           h = tg.viewportHeight;
@@ -172,7 +175,7 @@
         if (type == 'error') div.style = 'background: red; padding: 10px;';
         else {
           if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
+          setTimeout(function () {
             warningBanner.removeChild(div);
             updateBannerVisibility();
           }, 5000);
@@ -194,35 +197,36 @@
         showBanner: unityShowBanner,
       };
 
-      if (loadingBar) {
-        loadingBar.style.display = "flex";
-      }
+    if (loadingBar) {
+      loadingBar.style.display = "flex";
+    }
 
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = function() {
-        createUnityInstance(canvas, config, function(progress) {
-          if (progressBarFull) {
-            progressBarFull.style.width = (100 * progress) + "%";
-          }
-          if (loadingText) {
-            loadingText.innerText = "Loading GitJumps... " + Math.round(progress * 100) + "%";
-          }
-        }).then(function(unityInstance) {
-          if (loadingBar) {
-            loadingBar.style.display = "none";
-          }
-          // Re-synchronize dimensions and inform engine of final viewport size
-          resizeCanvas();
-          window.dispatchEvent(new Event("resize"));
-          setTimeout(resizeCanvas, 150);
-          setTimeout(resizeCanvas, 500);
-        }).catch(function(message) {
-          alert(message);
-        });
-      };
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (progress) {
+        if (progressBarFull) {
+          progressBarFull.style.width = (100 * progress) + "%";
+        }
+        if (loadingText) {
+          loadingText.innerText = "Loading GitJumps... " + Math.round(progress * 100) + "%";
+        }
+      }).then(function (unityInstance) {
+        if (loadingBar) {
+          loadingBar.style.display = "none";
+        }
+        // Re-synchronize dimensions and inform engine of final viewport size
+        resizeCanvas();
+        window.dispatchEvent(new Event("resize"));
+        setTimeout(resizeCanvas, 150);
+        setTimeout(resizeCanvas, 500);
+      }).catch(function (message) {
+        alert(message);
+      });
+    };
 
-      document.body.appendChild(script);
-    </script>
-  </body>
+    document.body.appendChild(script);
+  </script>
+</body>
+
 </html>

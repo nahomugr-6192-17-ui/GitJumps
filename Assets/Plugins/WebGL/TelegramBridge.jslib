@@ -5,9 +5,16 @@ mergeInto(LibraryManager.library, {
       if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
         initData = window.Telegram.WebApp.initData;
       } else {
-        // Fallback: check URL search params for ?tgWebAppData= or ?initData=
+        // Fallback 1: check URL query params for ?tgWebAppData= or ?initData=
         var urlParams = new URLSearchParams(window.location.search);
         initData = urlParams.get("tgWebAppData") || urlParams.get("initData") || "";
+
+        // Fallback 2: check URL hash params for #tgWebAppData= or #initData=
+        if (!initData && window.location.hash) {
+          var hashStr = window.location.hash.startsWith("#") ? window.location.hash.substring(1) : window.location.hash;
+          var hashParams = new URLSearchParams(hashStr);
+          initData = hashParams.get("tgWebAppData") || hashParams.get("initData") || "";
+        }
       }
     } catch (e) {
       console.warn("Failed to get Telegram initData:", e);
@@ -21,7 +28,15 @@ mergeInto(LibraryManager.library, {
 
   HasTelegramWebApp: function () {
     try {
-      return (window.Telegram && window.Telegram.WebApp && !!window.Telegram.WebApp.initData) ? 1 : 0;
+      if (window.Telegram && window.Telegram.WebApp && !!window.Telegram.WebApp.initData) return 1;
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("tgWebAppData") || urlParams.get("initData")) return 1;
+      if (window.location.hash) {
+        var hashStr = window.location.hash.startsWith("#") ? window.location.hash.substring(1) : window.location.hash;
+        var hashParams = new URLSearchParams(hashStr);
+        if (hashParams.get("tgWebAppData") || hashParams.get("initData")) return 1;
+      }
+      return 0;
     } catch (e) {
       return 0;
     }

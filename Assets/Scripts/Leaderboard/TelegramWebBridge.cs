@@ -34,6 +34,12 @@ namespace GitJumps.Leaderboard
             {
                 Debug.LogWarning($"[TelegramWebBridge] WebGL GetTelegramInitData failed: {ex.Message}");
             }
+
+            // In WebGL builds outside Telegram, only allow dev mock data if explicitly a debug build
+            if (!Debug.isDebugBuild)
+            {
+                return string.Empty;
+            }
 #endif
 
             // In Editor or when development mode is explicitly enabled

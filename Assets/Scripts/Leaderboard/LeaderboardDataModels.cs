@@ -62,5 +62,13 @@ namespace GitJumps.Leaderboard
     {
         public string initData;
     }
+
+    [Serializable]
+    public class ErrorResponse
+    {
+        public bool success;
+        public string error;
+        public string message;
+    }
 }
 

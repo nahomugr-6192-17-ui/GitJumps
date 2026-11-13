@@ -8,7 +8,6 @@ namespace GitJumps.Leaderboard
     public class LeaderboardUIController : MonoBehaviour
     {
         private static LeaderboardUIController _instance;
-        private static bool _isInstantiating = false;
 
         /// <summary>
         /// Returns the existing instance without creating one. Safe for use
@@ -16,35 +15,19 @@ namespace GitJumps.Leaderboard
         /// </summary>
         public static LeaderboardUIController InstanceIfExists => _instance;
 
+        /// <summary>
+        /// Returns the singleton instance if one exists in the scene.
+        /// Never instantiates a prefab — the LeaderboardManager must be placed
+        /// in each scene that needs it. This eliminates the cross-class recursive
+        /// Instantiate loop that caused "too much recursion" in WebGL.
+        /// </summary>
         public static LeaderboardUIController Instance
         {
             get
             {
-                if (_instance == null && !_isInstantiating)
+                if (_instance == null)
                 {
                     _instance = FindAnyObjectByType<LeaderboardUIController>(FindObjectsInactive.Include);
-                    if (_instance == null)
-                    {
-                        var prefab = Resources.Load<GameObject>("LeaderboardManager");
-                        if (prefab != null)
-                        {
-                            _isInstantiating = true;
-                            try
-                            {
-                                var go = Instantiate(prefab);
-                                go.name = "LeaderboardManager";
-                                _instance = go.GetComponent<LeaderboardUIController>();
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.LogError($"[LeaderboardUIController] Instantiate error: {ex.Message}");
-                            }
-                            finally
-                            {
-                                _isInstantiating = false;
-                            }
-                        }
-                    }
                 }
                 return _instance;
             }

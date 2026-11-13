@@ -9,7 +9,6 @@ namespace GitJumps.Leaderboard
     public class SupabaseLeaderboardManager : MonoBehaviour
     {
         private static SupabaseLeaderboardManager _instance;
-        private static bool _isInstantiating = false;
 
         /// <summary>
         /// Returns the existing instance without ever creating one.
@@ -17,35 +16,19 @@ namespace GitJumps.Leaderboard
         /// </summary>
         public static SupabaseLeaderboardManager InstanceIfExists => _instance;
 
+        /// <summary>
+        /// Returns the singleton instance if one exists in the scene.
+        /// Never instantiates a prefab — the LeaderboardManager must be placed
+        /// in each scene that needs it. This eliminates the cross-class recursive
+        /// Instantiate loop that caused "too much recursion" in WebGL.
+        /// </summary>
         public static SupabaseLeaderboardManager Instance
         {
             get
             {
-                if (_instance == null && !_isInstantiating)
+                if (_instance == null)
                 {
                     _instance = FindAnyObjectByType<SupabaseLeaderboardManager>(FindObjectsInactive.Include);
-                    if (_instance == null)
-                    {
-                        var prefab = Resources.Load<GameObject>("LeaderboardManager");
-                        if (prefab != null)
-                        {
-                            _isInstantiating = true;
-                            try
-                            {
-                                var go = Instantiate(prefab);
-                                go.name = "LeaderboardManager";
-                                _instance = go.GetComponent<SupabaseLeaderboardManager>();
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.LogError($"[SupabaseLeaderboardManager] Instantiate error: {ex.Message}");
-                            }
-                            finally
-                            {
-                                _isInstantiating = false;
-                            }
-                        }
-                    }
                 }
                 return _instance;
             }

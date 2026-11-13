@@ -105,27 +105,6 @@
           window.addEventListener("touchstart", tryFullscreenOnUserGesture, { passive: true, once: true });
 
           // ==========================================
-          // KEYBOARD EVENT RE-ENTRANCY GUARD
-          // ==========================================
-          // In Telegram's WebView, Unity's global keyboard capture causes an
-          // infinite loop: Unity captures event → WebView re-dispatches it →
-          // Unity captures it again → stack overflow.
-          // This guard detects re-entrant keyboard event processing and stops
-          // the recursive chain without disabling Unity's keyboard capture.
-          var _handlingKeyEvent = false;
-          ["keydown", "keyup", "keypress"].forEach(function (evtType) {
-            document.addEventListener(evtType, function (e) {
-              if (_handlingKeyEvent) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-                return;
-              }
-              _handlingKeyEvent = true;
-              Promise.resolve().then(function () { _handlingKeyEvent = false; });
-            }, true); // capture phase — runs before Unity's listeners
-          });
-
-          // ==========================================
           // ADAPTIVE VIEWPORT & CANVAS SIZING
           // ==========================================
           var canvas = document.querySelector("#unity-canvas");

@@ -116,99 +116,99 @@
       var w = window.innerWidth || document.documentElement.clientWidth || 360;
       var h = window.innerHeight || document.documentElement.clientHeight || 640;
 
-        if (isTelegram && tg && tg.viewportHeight && tg.viewportHeight > 0) {
-          h = tg.viewportHeight;
-        }
-
-        if (container) {
-          if (container.clientWidth > 0) {
-            w = container.clientWidth;
-          }
-          if (container.clientHeight > 0 && (!isTelegram || !tg || !tg.viewportHeight)) {
-            h = container.clientHeight;
-          }
-        }
-
-        return {
-          width: Math.max(w, 300),
-          height: Math.max(h, 300)
-        };
+      if (isTelegram && tg && tg.viewportHeight && tg.viewportHeight > 0) {
+        h = tg.viewportHeight;
       }
 
-      var lastCanvasWidth = 0;
-      var lastCanvasHeight = 0;
-      var lastCanvasDpr = 0;
-
-      function resizeCanvas() {
-        if (!canvas) return;
-
-        var dims = getViewportDimensions();
-        var canvasWidth = Math.floor(dims.width);
-        var canvasHeight = Math.floor(dims.height);
-        var pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-
-        if (canvasWidth === lastCanvasWidth && canvasHeight === lastCanvasHeight && pixelRatio === lastCanvasDpr) {
-          return;
+      if (container) {
+        if (container.clientWidth > 0) {
+          w = container.clientWidth;
         }
-
-        lastCanvasWidth = canvasWidth;
-        lastCanvasHeight = canvasHeight;
-        lastCanvasDpr = pixelRatio;
-
-        // Fill 100% of available viewport without letterbox margins
-        canvas.style.width = canvasWidth + "px";
-        canvas.style.height = canvasHeight + "px";
-
-        // Internal rendering resolution synchronized with display pixels
-        // Capped at 2x DPR for crisp retina text without unnecessary GPU/battery drain
-        canvas.width = Math.floor(canvasWidth * pixelRatio);
-        canvas.height = Math.floor(canvasHeight * pixelRatio);
+        if (container.clientHeight > 0 && (!isTelegram || !tg || !tg.viewportHeight)) {
+          h = container.clientHeight;
+        }
       }
 
-      // Initial sizing before Unity scripts begin downloading
-      resizeCanvas();
-      window.addEventListener("resize", resizeCanvas);
-      window.addEventListener("orientationchange", resizeCanvas);
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", resizeCanvas);
+      return {
+        width: Math.max(w, 300),
+        height: Math.max(h, 300)
+      };
+    }
+
+    var lastCanvasWidth = 0;
+    var lastCanvasHeight = 0;
+    var lastCanvasDpr = 0;
+
+    function resizeCanvas() {
+      if (!canvas) return;
+
+      var dims = getViewportDimensions();
+      var canvasWidth = Math.floor(dims.width);
+      var canvasHeight = Math.floor(dims.height);
+      var pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+      if (canvasWidth === lastCanvasWidth && canvasHeight === lastCanvasHeight && pixelRatio === lastCanvasDpr) {
+        return;
       }
 
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function () {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
+      lastCanvasWidth = canvasWidth;
+      lastCanvasHeight = canvasHeight;
+      lastCanvasDpr = pixelRatio;
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
-        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
-        #if USE_WASM
+      // Fill 100% of available viewport without letterbox margins
+      canvas.style.width = canvasWidth + "px";
+      canvas.style.height = canvasHeight + "px";
+
+      // Internal rendering resolution synchronized with display pixels
+      // Capped at 2x DPR for crisp retina text without unnecessary GPU/battery drain
+      canvas.width = Math.floor(canvasWidth * pixelRatio);
+      canvas.height = Math.floor(canvasHeight * pixelRatio);
+    }
+
+    // Initial sizing before Unity scripts begin downloading
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("orientationchange", resizeCanvas);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", resizeCanvas);
+    }
+
+    function unityShowBanner(msg, type) {
+      var warningBanner = document.querySelector("#unity-warning");
+      function updateBannerVisibility() {
+        warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+      }
+      var div = document.createElement('div');
+      div.innerHTML = msg;
+      warningBanner.appendChild(div);
+      if (type == 'error') div.style = 'background: red; padding: 10px;';
+      else {
+        if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+        setTimeout(function () {
+          warningBanner.removeChild(div);
+          updateBannerVisibility();
+        }, 5000);
+      }
+      updateBannerVisibility();
+    }
+
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+      frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+      #if USE_WASM
         codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
-        #endif
+      #endif
 #if SYMBOLS_FILENAME
         symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
-        #endif
+      #endif
         streamingAssetsUrl: "StreamingAssets",
-        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
-        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
-        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
-        showBanner: unityShowBanner,
+      companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+    productName: { { { JSON.stringify(PRODUCT_NAME) } } },
+    productVersion: { { { JSON.stringify(PRODUCT_VERSION) } } },
+    showBanner: unityShowBanner,
       };
 
     if (loadingBar) {

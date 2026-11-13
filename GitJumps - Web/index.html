@@ -16,7 +16,7 @@
 
   <body>
     <div id="unity-container">
-      <canvas id="unity-canvas" tabindex="1"></canvas>
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -103,6 +103,27 @@
           }
           window.addEventListener("click", tryFullscreenOnUserGesture, { passive: true, once: true });
           window.addEventListener("touchstart", tryFullscreenOnUserGesture, { passive: true, once: true });
+
+          // ==========================================
+          // KEYBOARD EVENT RE-ENTRANCY GUARD
+          // ==========================================
+          // In Telegram's WebView, Unity's global keyboard capture causes an
+          // infinite loop: Unity captures event → WebView re-dispatches it →
+          // Unity captures it again → stack overflow.
+          // This guard detects re-entrant keyboard event processing and stops
+          // the recursive chain without disabling Unity's keyboard capture.
+          var _handlingKeyEvent = false;
+          ["keydown", "keyup", "keypress"].forEach(function (evtType) {
+            document.addEventListener(evtType, function (e) {
+              if (_handlingKeyEvent) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                return;
+              }
+              _handlingKeyEvent = true;
+              Promise.resolve().then(function () { _handlingKeyEvent = false; });
+            }, true); // capture phase — runs before Unity's listeners
+          });
 
           // ==========================================
           // ADAPTIVE VIEWPORT & CANVAS SIZING
@@ -226,13 +247,6 @@
             }).then(function (unityInstance) {
               if (loadingBar) {
                 loadingBar.style.display = "none";
-              }
-              // Give the canvas focus so keyboard events reach Unity
-              // (required when WebGLInput.captureAllKeyboardInput is false)
-              if (canvas) {
-                canvas.focus();
-                canvas.addEventListener("mousedown", function () { canvas.focus(); });
-                canvas.addEventListener("touchstart", function () { canvas.focus(); }, { passive: true });
               }
               // Re-synchronize dimensions and inform engine of final viewport size
               resizeCanvas();

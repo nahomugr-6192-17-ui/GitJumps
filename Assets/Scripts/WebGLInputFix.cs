@@ -1,29 +1,17 @@
 using UnityEngine;
 
 /// <summary>
-/// Prevents Unity WebGL from globally intercepting all DOM keyboard events.
-/// In WebView environments (like Telegram Mini Apps), global capture causes
-/// infinite event dispatching loops resulting in "Maximum call stack size exceeded"
-/// or "too much recursion" errors.
-///
-/// This runs automatically before any scene loads via RuntimeInitializeOnLoadMethod,
-/// and also as a MonoBehaviour Awake fallback if placed on a GameObject.
+/// Placeholder for WebGL input fixes.
+/// The actual recursion prevention is handled in index.html via a JavaScript
+/// re-entrancy guard on keyboard events, which prevents Telegram's WebView
+/// from creating infinite event dispatch loops without breaking Unity's
+/// Input System initialization (which requires captureAllKeyboardInput = true).
 /// </summary>
 public class WebGLInputFix : MonoBehaviour
 {
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void DisableGlobalKeyboardCapture()
-    {
-#if !UNITY_EDITOR && UNITY_WEBGL
-        WebGLInput.captureAllKeyboardInput = false;
-#endif
-    }
-
-    private void Awake()
-    {
-#if !UNITY_EDITOR && UNITY_WEBGL
-        WebGLInput.captureAllKeyboardInput = false;
-#endif
-    }
+    // The fix is in index.html JavaScript — see the keyboard event re-entrancy guard.
+    // We intentionally do NOT set WebGLInput.captureAllKeyboardInput = false here
+    // because that prevents the Input System from initializing its keyboard device
+    // table, causing "RuntimeError: index out of bounds" during callMain.
 }
 

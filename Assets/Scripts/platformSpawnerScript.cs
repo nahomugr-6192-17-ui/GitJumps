@@ -141,6 +141,8 @@ public class platformSpawnerScript : MonoBehaviour
 
         nextMovingPowerUpCount = Random.Range(minStationaryPowerUps, maxStationaryPowerUps + 1);
 
+        AdjustSpawnerForCamera();
+        PrewarmInitialPlatforms();
         PrewarmStars();
     }
 
@@ -477,6 +479,73 @@ public class platformSpawnerScript : MonoBehaviour
     }
 
     // --------------------------------
+    // ADAPTIVE CAMERA & SPAWNER SETUP
+    // --------------------------------
+
+    public void AdjustSpawnerForCamera()
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+            return;
+
+        cameraScript camScript = cam.GetComponent<cameraScript>();
+        if (camScript != null)
+        {
+            camScript.UpdateCameraFraming();
+        }
+
+        // Camera top during gameplay
+        float gameplayTop = (camScript != null ? camScript.EffectiveGameplayY : cam.transform.position.y) + cam.orthographicSize;
+        float requiredSpawnerY = gameplayTop + 0.05f;
+
+        if (spawner != null && requiredSpawnerY > spawner.transform.position.y)
+        {
+            spawner.transform.position = new Vector3(
+                spawner.transform.position.x,
+                requiredSpawnerY,
+                spawner.transform.position.z
+            );
+            starSpawnY = requiredSpawnerY + 0.1f;
+        }
+
+        // Update star horizontal bounds to match full camera view
+        float halfWidth = cam.orthographicSize * cam.aspect;
+        starMinX = -halfWidth + 1.2f;
+        starMaxX = halfWidth - 1.2f;
+    }
+
+    private void PrewarmInitialPlatforms()
+    {
+        if (platformPrefab == null || spawner == null)
+            return;
+
+        // Find the highest pre-existing platform in the scene
+        float highestY = 8.88f;
+        GameObject[] containers = GameObject.FindGameObjectsWithTag("BlockContainer");
+        foreach (GameObject c in containers)
+        {
+            if (c != null && c.transform.position.y > highestY)
+            {
+                highestY = c.transform.position.y;
+            }
+        }
+
+        // Fill platforms upward up to the spawner if the screen is taller than 16:9
+        float currentY = highestY + gapBetweenPlatforms;
+        while (currentY <= spawner.transform.position.y)
+        {
+            float randomX = Random.Range(minX, maxX);
+            Vector3 spawnPosition = new Vector3(randomX, currentY, 0f);
+            GameObject newPlatform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity);
+            spawnedPlatforms.Add(newPlatform.transform);
+            lastSpawnedPlatform = newPlatform.transform;
+            lastSpawnedPlatformObject = newPlatform;
+            lastSpawnedFrame = Time.frameCount;
+            currentY += gapBetweenPlatforms;
+        }
+    }
+
+    // --------------------------------
     // STAR BACKGROUND SPAWNING
     // --------------------------------
 
@@ -500,10 +569,24 @@ public class platformSpawnerScript : MonoBehaviour
 
         EnsureStarContainer();
 
-        for (int i = 0; i < initialStarCount; i++)
+        Camera cam = Camera.main;
+        float camBottom = -9.5f;
+        float camTop = 10.5f;
+        int starsToSpawn = initialStarCount;
+
+        if (cam != null)
+        {
+            cameraScript camScript = cam.GetComponent<cameraScript>();
+            float centerY = camScript != null ? camScript.EffectiveGameplayY : cam.transform.position.y;
+            camBottom = centerY - cam.orthographicSize;
+            camTop = centerY + cam.orthographicSize;
+            starsToSpawn = Mathf.RoundToInt(initialStarCount * (cam.orthographicSize / 10f));
+        }
+
+        for (int i = 0; i < starsToSpawn; i++)
         {
             float randX = Random.Range(starMinX, starMaxX);
-            float randY = Random.Range(-9.5f, 10.5f);
+            float randY = Random.Range(camBottom, camTop);
             SpawnStarAtPosition(new Vector3(randX, randY, 0f));
         }
     }

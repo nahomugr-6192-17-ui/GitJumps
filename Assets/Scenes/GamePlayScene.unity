@@ -5665,6 +5665,8 @@ MonoBehaviour:
   fallGroundY: -40
   playerFallY: -8.57
   smoothSpeed: 5
+  targetAspect: 1.7777778
+  baselineOrthoSize: 10
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -6424,7 +6426,6 @@ MonoBehaviour:
   platformSpeedCoolingRate: 1
   horizontalAcceleration: 35
   horizontalDeceleration: 45
-  jumpCutMultiplier: 0.5
   commitJumpMultiplier: 1.3
   commitBoostDuration: 0.95
   Commit: {fileID: 8149861642825298336}
@@ -7045,8 +7046,28 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4472500654921953985, guid: d12ba59f07e890a479fdd92ba0af4d02, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5131590191448588830}
   m_SourcePrefab: {fileID: 100100000, guid: d12ba59f07e890a479fdd92ba0af4d02, type: 3}
+--- !u!1 &5131590191448588829 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4472500654921953985, guid: d12ba59f07e890a479fdd92ba0af4d02, type: 3}
+  m_PrefabInstance: {fileID: 5131590191448588828}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5131590191448588830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5131590191448588829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f6a1373fbce3674087d9238f38ca457, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WebGLInputFix
 --- !u!1 &8149861642825298336 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 472773342878782623, guid: 7b7b630deb2935641ac19740289fee94, type: 3}

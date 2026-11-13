@@ -16,7 +16,7 @@
 
   <body>
     <div id="unity-container">
-      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <canvas id="unity-canvas" tabindex="1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -226,6 +226,13 @@
             }).then(function (unityInstance) {
               if (loadingBar) {
                 loadingBar.style.display = "none";
+              }
+              // Give the canvas focus so keyboard events reach Unity
+              // (required when WebGLInput.captureAllKeyboardInput is false)
+              if (canvas) {
+                canvas.focus();
+                canvas.addEventListener("mousedown", function () { canvas.focus(); });
+                canvas.addEventListener("touchstart", function () { canvas.focus(); }, { passive: true });
               }
               // Re-synchronize dimensions and inform engine of final viewport size
               resizeCanvas();

@@ -9,27 +9,40 @@ namespace GitJumps.Leaderboard
     public class SupabaseLeaderboardManager : MonoBehaviour
     {
         private static SupabaseLeaderboardManager _instance;
+        private static bool _isInstantiating = false;
+
         public static SupabaseLeaderboardManager Instance
         {
             get
             {
-                if (_instance == null)
+                if (_instance == null && !_isInstantiating)
                 {
-                    _instance = FindAnyObjectByType<SupabaseLeaderboardManager>();
+                    _instance = FindAnyObjectByType<SupabaseLeaderboardManager>(FindObjectsInactive.Include);
                     if (_instance == null)
                     {
                         var prefab = Resources.Load<GameObject>("LeaderboardManager");
                         if (prefab != null)
                         {
-                            var go = Instantiate(prefab);
-                            go.name = "LeaderboardManager";
-                            _instance = go.GetComponent<SupabaseLeaderboardManager>();
+                            _isInstantiating = true;
+                            try
+                            {
+                                var go = Instantiate(prefab);
+                                go.name = "LeaderboardManager";
+                                _instance = go.GetComponent<SupabaseLeaderboardManager>();
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.LogError($"[SupabaseLeaderboardManager] Instantiate error: {ex.Message}");
+                            }
+                            finally
+                            {
+                                _isInstantiating = false;
+                            }
                         }
                     }
                 }
                 return _instance;
             }
-            private set => _instance = value;
         }
 
         [Header("Supabase Configuration")]
@@ -53,6 +66,7 @@ namespace GitJumps.Leaderboard
         public PlayerProfile CurrentPlayer { get; private set; }
         public LeaderboardResponse LatestLeaderboard { get; private set; }
         public bool IsFetchingLeaderboard { get; private set; }
+        public bool IsInitializingPlayer { get; private set; }
         public bool IsSubmittingScore { get; private set; }
 
         // Events
@@ -63,14 +77,22 @@ namespace GitJumps.Leaderboard
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
+            if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
 
-            Instance = this;
+            _instance = this;
             DontDestroyOnLoad(gameObject);
+        }
+
+        private void OnDestroy()
+        {
+            if (_instance == this)
+            {
+                _instance = null;
+            }
         }
 
         private void Start()
@@ -99,6 +121,8 @@ namespace GitJumps.Leaderboard
         /// </summary>
         public void InitializePlayer(Action<PlayerProfileResponse> onComplete = null)
         {
+            if (IsInitializingPlayer) return;
+
             string initData = GetTelegramAuthData();
             if (string.IsNullOrEmpty(initData))
             {
@@ -112,6 +136,7 @@ namespace GitJumps.Leaderboard
 
         private IEnumerator InitializePlayerRoutine(string initData, Action<PlayerProfileResponse> onComplete)
         {
+            IsInitializingPlayer = true;
             string url = $"{supabaseUrl.TrimEnd('/')}/functions/v1/get-or-create-player";
             var payload = new PlayerInitPayload { initData = initData };
             string jsonBody = JsonUtility.ToJson(payload);
@@ -119,6 +144,8 @@ namespace GitJumps.Leaderboard
             using (UnityWebRequest req = CreatePostRequest(url, jsonBody))
             {
                 yield return req.SendWebRequest();
+
+                IsInitializingPlayer = false;
 
                 PlayerProfileResponse response = null;
                 if (req.result == UnityWebRequest.Result.Success)
@@ -227,7 +254,7 @@ namespace GitJumps.Leaderboard
         /// </summary>
         public void SubmitScore(int score, Action<SubmitScoreResponse> onComplete = null, Action<string> onError = null)
         {
-            if (score < 0) return;
+            if (score < 0 || IsSubmittingScore) return;
             StartCoroutine(SubmitScoreRoutine(score, onComplete, onError));
         }
 

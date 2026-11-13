@@ -135,12 +135,25 @@
         };
       }
 
+      var lastCanvasWidth = 0;
+      var lastCanvasHeight = 0;
+      var lastCanvasDpr = 0;
+
       function resizeCanvas() {
         if (!canvas) return;
 
         var dims = getViewportDimensions();
         var canvasWidth = Math.floor(dims.width);
         var canvasHeight = Math.floor(dims.height);
+        var pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+        if (canvasWidth === lastCanvasWidth && canvasHeight === lastCanvasHeight && pixelRatio === lastCanvasDpr) {
+          return;
+        }
+
+        lastCanvasWidth = canvasWidth;
+        lastCanvasHeight = canvasHeight;
+        lastCanvasDpr = pixelRatio;
 
         // Fill 100% of available viewport without letterbox margins
         canvas.style.width = canvasWidth + "px";
@@ -148,7 +161,6 @@
 
         // Internal rendering resolution synchronized with display pixels
         // Capped at 2x DPR for crisp retina text without unnecessary GPU/battery drain
-        var pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
         canvas.width = Math.floor(canvasWidth * pixelRatio);
         canvas.height = Math.floor(canvasHeight * pixelRatio);
       }
@@ -159,9 +171,6 @@
       window.addEventListener("orientationchange", resizeCanvas);
       if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", resizeCanvas);
-      }
-      if (typeof ResizeObserver !== "undefined" && container) {
-        new ResizeObserver(resizeCanvas).observe(container);
       }
 
       function unityShowBanner(msg, type) {
@@ -222,7 +231,6 @@
         }
         // Re-synchronize dimensions and inform engine of final viewport size
         resizeCanvas();
-        window.dispatchEvent(new Event("resize"));
         setTimeout(resizeCanvas, 150);
         setTimeout(resizeCanvas, 500);
       }).catch(function (message) {

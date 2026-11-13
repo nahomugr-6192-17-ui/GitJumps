@@ -8,27 +8,40 @@ namespace GitJumps.Leaderboard
     public class LeaderboardUIController : MonoBehaviour
     {
         private static LeaderboardUIController _instance;
+        private static bool _isInstantiating = false;
+
         public static LeaderboardUIController Instance
         {
             get
             {
-                if (_instance == null)
+                if (_instance == null && !_isInstantiating)
                 {
-                    _instance = FindAnyObjectByType<LeaderboardUIController>();
+                    _instance = FindAnyObjectByType<LeaderboardUIController>(FindObjectsInactive.Include);
                     if (_instance == null)
                     {
                         var prefab = Resources.Load<GameObject>("LeaderboardManager");
                         if (prefab != null)
                         {
-                            var go = Instantiate(prefab);
-                            go.name = "LeaderboardManager";
-                            _instance = go.GetComponent<LeaderboardUIController>();
+                            _isInstantiating = true;
+                            try
+                            {
+                                var go = Instantiate(prefab);
+                                go.name = "LeaderboardManager";
+                                _instance = go.GetComponent<LeaderboardUIController>();
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.LogError($"[LeaderboardUIController] Instantiate error: {ex.Message}");
+                            }
+                            finally
+                            {
+                                _isInstantiating = false;
+                            }
                         }
                     }
                 }
                 return _instance;
             }
-            private set => _instance = value;
         }
 
         private UIDocument uiDocument;
@@ -54,14 +67,22 @@ namespace GitJumps.Leaderboard
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
+            if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
-            Instance = this;
+            _instance = this;
 
             uiDocument = GetComponent<UIDocument>();
+        }
+
+        private void OnDestroy()
+        {
+            if (_instance == this)
+            {
+                _instance = null;
+            }
         }
 
         private void OnEnable()
@@ -72,15 +93,21 @@ namespace GitJumps.Leaderboard
             QueryUIElements();
             RegisterCallbacks();
 
-            if (SupabaseLeaderboardManager.Instance != null)
+            var manager = SupabaseLeaderboardManager.Instance;
+            if (manager != null)
             {
-                SupabaseLeaderboardManager.Instance.OnLeaderboardLoaded += HandleLeaderboardLoaded;
-                SupabaseLeaderboardManager.Instance.OnLeaderboardError += HandleLeaderboardError;
-                SupabaseLeaderboardManager.Instance.OnPlayerProfileUpdated += HandlePlayerProfileUpdated;
+                manager.OnLeaderboardLoaded -= HandleLeaderboardLoaded;
+                manager.OnLeaderboardLoaded += HandleLeaderboardLoaded;
 
-                if (SupabaseLeaderboardManager.Instance.CurrentPlayer != null)
+                manager.OnLeaderboardError -= HandleLeaderboardError;
+                manager.OnLeaderboardError += HandleLeaderboardError;
+
+                manager.OnPlayerProfileUpdated -= HandlePlayerProfileUpdated;
+                manager.OnPlayerProfileUpdated += HandlePlayerProfileUpdated;
+
+                if (manager.CurrentPlayer != null)
                 {
-                    UpdateProfileDisplay(SupabaseLeaderboardManager.Instance.CurrentPlayer);
+                    UpdateProfileDisplay(manager.CurrentPlayer);
                 }
             }
         }
@@ -89,11 +116,12 @@ namespace GitJumps.Leaderboard
         {
             UnregisterCallbacks();
 
-            if (SupabaseLeaderboardManager.Instance != null)
+            var manager = SupabaseLeaderboardManager.Instance;
+            if (manager != null)
             {
-                SupabaseLeaderboardManager.Instance.OnLeaderboardLoaded -= HandleLeaderboardLoaded;
-                SupabaseLeaderboardManager.Instance.OnLeaderboardError -= HandleLeaderboardError;
-                SupabaseLeaderboardManager.Instance.OnPlayerProfileUpdated -= HandlePlayerProfileUpdated;
+                manager.OnLeaderboardLoaded -= HandleLeaderboardLoaded;
+                manager.OnLeaderboardError -= HandleLeaderboardError;
+                manager.OnPlayerProfileUpdated -= HandlePlayerProfileUpdated;
             }
         }
 
@@ -118,10 +146,16 @@ namespace GitJumps.Leaderboard
         private void RegisterCallbacks()
         {
             if (closeButton != null)
+            {
+                closeButton.clicked -= HideLeaderboard;
                 closeButton.clicked += HideLeaderboard;
+            }
 
             if (refreshButton != null)
+            {
+                refreshButton.clicked -= RefreshLeaderboard;
                 refreshButton.clicked += RefreshLeaderboard;
+            }
         }
 
         private void UnregisterCallbacks()
@@ -144,13 +178,14 @@ namespace GitJumps.Leaderboard
             }
 
             // Update personal profile
-            if (SupabaseLeaderboardManager.Instance != null && SupabaseLeaderboardManager.Instance.CurrentPlayer != null)
+            var manager = SupabaseLeaderboardManager.Instance;
+            if (manager != null && manager.CurrentPlayer != null)
             {
-                UpdateProfileDisplay(SupabaseLeaderboardManager.Instance.CurrentPlayer);
+                UpdateProfileDisplay(manager.CurrentPlayer);
             }
             else
             {
-                string authData = SupabaseLeaderboardManager.Instance != null ? SupabaseLeaderboardManager.Instance.GetTelegramAuthData() : null;
+                string authData = manager != null ? manager.GetTelegramAuthData() : null;
                 if (string.IsNullOrEmpty(authData))
                 {
                     SetProfileGuestState();
@@ -158,9 +193,9 @@ namespace GitJumps.Leaderboard
                 else
                 {
                     SetProfileLoadingState();
-                    if (SupabaseLeaderboardManager.Instance != null)
+                    if (manager != null)
                     {
-                        SupabaseLeaderboardManager.Instance.InitializePlayer((res) =>
+                        manager.InitializePlayer((res) =>
                         {
                             if (res != null && res.player != null)
                             {
@@ -190,12 +225,11 @@ namespace GitJumps.Leaderboard
         {
             SetLoadingState();
 
-            if (SupabaseLeaderboardManager.Instance != null)
+            var manager = SupabaseLeaderboardManager.Instance;
+            if (manager != null)
             {
-                SupabaseLeaderboardManager.Instance.FetchLeaderboard(
-                    onComplete: HandleLeaderboardLoaded,
-                    onError: HandleLeaderboardError
-                );
+                // Events already wired to HandleLeaderboardLoaded and HandleLeaderboardError
+                manager.FetchLeaderboard();
             }
             else
             {

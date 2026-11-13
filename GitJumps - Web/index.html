@@ -27,240 +27,216 @@
       <div id="unity-warning"></div>
     </div>
     <script>
-      // ==========================================
-      // TELEGRAM MINI APP INITIALIZATION & FULLSCREEN
-      // ==========================================
-      var isTelegram = false;
-      var tg = null;
+          // ==========================================
+          // TELEGRAM MINI APP INITIALIZATION & FULLSCREEN
+          // ==========================================
+          var isTelegram = false;
+          var tg = null;
 
-      try {
-        if (window.Telegram && window.Telegram.WebApp) {
-          tg = window.Telegram.WebApp;
-          isTelegram = true;
-        }
-      } catch (e) {
-        console.warn("Telegram WebApp detection error:", e);
-      }
-
-      if (isTelegram && tg) {
-        try {
-          // Immediately notify Telegram that the initial UI is ready
-          tg.ready();
-
-          // Expand Mini App to fill available height
-          if (typeof tg.expand === "function") {
-            tg.expand();
+          try {
+            if (window.Telegram && window.Telegram.WebApp) {
+              tg = window.Telegram.WebApp;
+              isTelegram = true;
+            }
+          } catch (e) {
+            console.warn("Telegram WebApp detection error:", e);
           }
 
-          // Request official fullscreen (Telegram Bot API 8.0+)
-          if (typeof tg.requestFullscreen === "function") {
-            tg.requestFullscreen();
-          }
+          if (isTelegram && tg) {
+            try {
+              // Immediately notify Telegram that the initial UI is ready
+              tg.ready();
 
-          // Disable vertical swipe-to-close gesture during active mobile gameplay
-          if (typeof tg.disableVerticalSwipes === "function") {
-            tg.disableVerticalSwipes();
-          }
-
-          // Set branded dark header and background colors matching GitJumps theme
-          if (typeof tg.setHeaderColor === "function") {
-            tg.setHeaderColor("#0b0f19");
-          }
-          if (typeof tg.setBackgroundColor === "function") {
-            tg.setBackgroundColor("#0b0f19");
-          }
-
-          // Event listeners for viewport & fullscreen state changes
-          if (typeof tg.onEvent === "function") {
-            tg.onEvent("fullscreenChanged", function () {
-              resizeCanvas();
-            });
-
-            tg.onEvent("fullscreenFailed", function (error) {
-              console.warn("Telegram requestFullscreen failed:", error);
+              // Expand Mini App to fill available height
               if (typeof tg.expand === "function") {
                 tg.expand();
               }
-              resizeCanvas();
-            });
 
-            tg.onEvent("viewportChanged", function (state) {
-              resizeCanvas();
-            });
-          }
-        } catch (err) {
-          console.warn("Telegram WebApp initialization error:", err);
-        }
-      }
+              // Request official fullscreen (Telegram Bot API 8.0+)
+              if (typeof tg.requestFullscreen === "function") {
+                tg.requestFullscreen();
+              }
 
-      // Fallback: If Telegram requires a user interaction gesture for fullscreen
-      function tryFullscreenOnUserGesture() {
-        if (
-          isTelegram &&
-          tg &&
-          typeof tg.requestFullscreen === "function" &&
-          !tg.isFullscreen
-        ) {
-          try {
-            tg.requestFullscreen();
-          } catch (e) {}
-        }
-      }
-      window.addEventListener("click", tryFullscreenOnUserGesture, {
-        passive: true,
-        once: true,
-      });
-      window.addEventListener("touchstart", tryFullscreenOnUserGesture, {
-        passive: true,
-        once: true,
-      });
+              // Disable vertical swipe-to-close gesture during active mobile gameplay
+              if (typeof tg.disableVerticalSwipes === "function") {
+                tg.disableVerticalSwipes();
+              }
 
-      // ==========================================
-      // ADAPTIVE VIEWPORT & CANVAS SIZING
-      // ==========================================
-      var canvas = document.querySelector("#unity-canvas");
-      var container = document.querySelector("#unity-container");
-      var loadingBar = document.querySelector("#unity-loading-bar");
-      var progressBarFull = document.querySelector("#unity-progress-bar-full");
-      var loadingText = document.querySelector("#unity-loading-text");
+              // Set branded dark header and background colors matching GitJumps theme
+              if (typeof tg.setHeaderColor === "function") {
+                tg.setHeaderColor("#0b0f19");
+              }
+              if (typeof tg.setBackgroundColor === "function") {
+                tg.setBackgroundColor("#0b0f19");
+              }
 
-      function getViewportDimensions() {
-        var w =
-          window.innerWidth || document.documentElement.clientWidth || 360;
-        var h =
-          window.innerHeight || document.documentElement.clientHeight || 640;
+              // Event listeners for viewport & fullscreen state changes
+              if (typeof tg.onEvent === "function") {
+                tg.onEvent("fullscreenChanged", function () {
+                  resizeCanvas();
+                });
 
-        if (isTelegram && tg && tg.viewportHeight && tg.viewportHeight > 0) {
-          h = tg.viewportHeight;
-        }
+                tg.onEvent("fullscreenFailed", function (error) {
+                  console.warn("Telegram requestFullscreen failed:", error);
+                  if (typeof tg.expand === "function") {
+                    tg.expand();
+                  }
+                  resizeCanvas();
+                });
 
-        if (container) {
-          if (container.clientWidth > 0) {
-            w = container.clientWidth;
-          }
-          if (
-            container.clientHeight > 0 &&
-            (!isTelegram || !tg || !tg.viewportHeight)
-          ) {
-            h = container.clientHeight;
-          }
-        }
-
-        return {
-          width: Math.max(w, 300),
-          height: Math.max(h, 300),
-        };
-      }
-
-      var lastCanvasWidth = 0;
-      var lastCanvasHeight = 0;
-      var lastCanvasDpr = 0;
-
-      function resizeCanvas() {
-        if (!canvas) return;
-
-        var dims = getViewportDimensions();
-        var canvasWidth = Math.floor(dims.width);
-        var canvasHeight = Math.floor(dims.height);
-        var pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-
-        if (
-          canvasWidth === lastCanvasWidth &&
-          canvasHeight === lastCanvasHeight &&
-          pixelRatio === lastCanvasDpr
-        ) {
-          return;
-        }
-
-        lastCanvasWidth = canvasWidth;
-        lastCanvasHeight = canvasHeight;
-        lastCanvasDpr = pixelRatio;
-
-        // Fill 100% of available viewport without letterbox margins
-        canvas.style.width = canvasWidth + "px";
-        canvas.style.height = canvasHeight + "px";
-
-        // Internal rendering resolution synchronized with display pixels
-        // Capped at 2x DPR for crisp retina text without unnecessary GPU/battery drain
-        canvas.width = Math.floor(canvasWidth * pixelRatio);
-        canvas.height = Math.floor(canvasHeight * pixelRatio);
-      }
-
-      // Initial sizing before Unity scripts begin downloading
-      resizeCanvas();
-      window.addEventListener("resize", resizeCanvas);
-      window.addEventListener("orientationchange", resizeCanvas);
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", resizeCanvas);
-      }
-
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length
-            ? "block"
-            : "none";
-        }
-        var div = document.createElement("div");
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == "error") div.style = "background: red; padding: 10px;";
-        else {
-          if (type == "warning")
-            div.style = "background: yellow; padding: 10px;";
-          setTimeout(function () {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
-
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/GitJumps - Web.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/GitJumps - Web.data.br",
-        frameworkUrl: buildUrl + "/GitJumps - Web.framework.js.br",
-        codeUrl: buildUrl + "/GitJumps - Web.wasm.br",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "Papa Smurf",
-        productName: "GitJumps",
-        productVersion: "1.0",
-        showBanner: unityShowBanner,
-      };
-
-      if (loadingBar) {
-        loadingBar.style.display = "flex";
-      }
-
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = function () {
-        createUnityInstance(canvas, config, function (progress) {
-          if (progressBarFull) {
-            progressBarFull.style.width = 100 * progress + "%";
-          }
-          if (loadingText) {
-            loadingText.innerText =
-              "Loading GitJumps... " + Math.round(progress * 100) + "%";
-          }
-        })
-          .then(function (unityInstance) {
-            if (loadingBar) {
-              loadingBar.style.display = "none";
+                tg.onEvent("viewportChanged", function (state) {
+                  resizeCanvas();
+                });
+              }
+            } catch (err) {
+              console.warn("Telegram WebApp initialization error:", err);
             }
-            // Re-synchronize dimensions and inform engine of final viewport size
-            resizeCanvas();
-            setTimeout(resizeCanvas, 150);
-            setTimeout(resizeCanvas, 500);
-          })
-          .catch(function (message) {
-            alert(message);
-          });
-      };
+          }
 
-      document.body.appendChild(script);
+          // Fallback: If Telegram requires a user interaction gesture for fullscreen
+          function tryFullscreenOnUserGesture() {
+            if (isTelegram && tg && typeof tg.requestFullscreen === "function" && !tg.isFullscreen) {
+              try {
+                tg.requestFullscreen();
+              } catch (e) { }
+            }
+          }
+          window.addEventListener("click", tryFullscreenOnUserGesture, { passive: true, once: true });
+          window.addEventListener("touchstart", tryFullscreenOnUserGesture, { passive: true, once: true });
+
+          // ==========================================
+          // ADAPTIVE VIEWPORT & CANVAS SIZING
+          // ==========================================
+          var canvas = document.querySelector("#unity-canvas");
+          var container = document.querySelector("#unity-container");
+          var loadingBar = document.querySelector("#unity-loading-bar");
+          var progressBarFull = document.querySelector("#unity-progress-bar-full");
+          var loadingText = document.querySelector("#unity-loading-text");
+
+          function getViewportDimensions() {
+            var w = window.innerWidth || document.documentElement.clientWidth || 360;
+            var h = window.innerHeight || document.documentElement.clientHeight || 640;
+
+            if (isTelegram && tg && tg.viewportHeight && tg.viewportHeight > 0) {
+              h = tg.viewportHeight;
+            }
+
+            if (container) {
+              if (container.clientWidth > 0) {
+                w = container.clientWidth;
+              }
+              if (container.clientHeight > 0 && (!isTelegram || !tg || !tg.viewportHeight)) {
+                h = container.clientHeight;
+              }
+            }
+
+            return {
+              width: Math.max(w, 300),
+              height: Math.max(h, 300)
+            };
+          }
+
+          var lastCanvasWidth = 0;
+          var lastCanvasHeight = 0;
+          var lastCanvasDpr = 0;
+
+          function resizeCanvas() {
+            if (!canvas) return;
+
+            var dims = getViewportDimensions();
+            var canvasWidth = Math.floor(dims.width);
+            var canvasHeight = Math.floor(dims.height);
+            var pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+            if (canvasWidth === lastCanvasWidth && canvasHeight === lastCanvasHeight && pixelRatio === lastCanvasDpr) {
+              return;
+            }
+
+            lastCanvasWidth = canvasWidth;
+            lastCanvasHeight = canvasHeight;
+            lastCanvasDpr = pixelRatio;
+
+            // Fill 100% of available viewport without letterbox margins
+            canvas.style.width = canvasWidth + "px";
+            canvas.style.height = canvasHeight + "px";
+
+            // Internal rendering resolution synchronized with display pixels
+            // Capped at 2x DPR for crisp retina text without unnecessary GPU/battery drain
+            canvas.width = Math.floor(canvasWidth * pixelRatio);
+            canvas.height = Math.floor(canvasHeight * pixelRatio);
+          }
+
+          // Initial sizing before Unity scripts begin downloading
+          resizeCanvas();
+          window.addEventListener("resize", resizeCanvas);
+          window.addEventListener("orientationchange", resizeCanvas);
+          if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", resizeCanvas);
+          }
+
+          function unityShowBanner(msg, type) {
+            var warningBanner = document.querySelector("#unity-warning");
+            function updateBannerVisibility() {
+              warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+            }
+            var div = document.createElement('div');
+            div.innerHTML = msg;
+            warningBanner.appendChild(div);
+            if (type == 'error') div.style = 'background: red; padding: 10px;';
+            else {
+              if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+              setTimeout(function () {
+                warningBanner.removeChild(div);
+                updateBannerVisibility();
+              }, 5000);
+            }
+            updateBannerVisibility();
+          }
+
+          var buildUrl = "Build";
+          var loaderUrl = buildUrl + "/GitJumps - Web.loader.js";
+
+          var config = {
+            arguments: [],
+            dataUrl: buildUrl + "/GitJumps - Web.data.br",
+            frameworkUrl: buildUrl + "/GitJumps - Web.framework.js.br",
+            codeUrl: buildUrl + "/GitJumps - Web.wasm.br",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "Papa Smurf",
+            productName: "GitJumps",
+            productVersion: "1.0",
+            showBanner: unityShowBanner,
+          };
+
+
+          if (loadingBar) {
+            loadingBar.style.display = "flex";
+          }
+
+          var script = document.createElement("script");
+          script.src = loaderUrl;
+          script.onload = function () {
+            createUnityInstance(canvas, config, function (progress) {
+              if (progressBarFull) {
+                progressBarFull.style.width = (100 * progress) + "%";
+              }
+              if (loadingText) {
+                loadingText.innerText = "Loading GitJumps... " + Math.round(progress * 100) + "%";
+              }
+            }).then(function (unityInstance) {
+              if (loadingBar) {
+                loadingBar.style.display = "none";
+              }
+              // Re-synchronize dimensions and inform engine of final viewport size
+              resizeCanvas();
+              setTimeout(resizeCanvas, 150);
+              setTimeout(resizeCanvas, 500);
+            }).catch(function (message) {
+              alert(message);
+            });
+          };
+
+          document.body.appendChild(script);
     </script>
   </body>
 </html>

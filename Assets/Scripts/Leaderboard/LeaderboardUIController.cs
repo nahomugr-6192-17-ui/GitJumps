@@ -10,6 +10,12 @@ namespace GitJumps.Leaderboard
         private static LeaderboardUIController _instance;
         private static bool _isInstantiating = false;
 
+        /// <summary>
+        /// Returns the existing instance without creating one. Safe for use
+        /// during Awake/OnEnable/OnDisable to prevent recursive instantiation.
+        /// </summary>
+        public static LeaderboardUIController InstanceIfExists => _instance;
+
         public static LeaderboardUIController Instance
         {
             get
@@ -93,7 +99,9 @@ namespace GitJumps.Leaderboard
             QueryUIElements();
             RegisterCallbacks();
 
-            var manager = SupabaseLeaderboardManager.Instance;
+            // Use the backing field to avoid triggering recursive prefab instantiation.
+            // If the manager hasn't been created yet, events will be wired when ShowLeaderboard() runs.
+            var manager = SupabaseLeaderboardManager.InstanceIfExists;
             if (manager != null)
             {
                 manager.OnLeaderboardLoaded -= HandleLeaderboardLoaded;
@@ -116,7 +124,8 @@ namespace GitJumps.Leaderboard
         {
             UnregisterCallbacks();
 
-            var manager = SupabaseLeaderboardManager.Instance;
+            // Use the backing field — never instantiate a new manager during teardown.
+            var manager = SupabaseLeaderboardManager.InstanceIfExists;
             if (manager != null)
             {
                 manager.OnLeaderboardLoaded -= HandleLeaderboardLoaded;
@@ -177,8 +186,20 @@ namespace GitJumps.Leaderboard
                 leaderboardOverlay.style.display = DisplayStyle.Flex;
             }
 
-            // Update personal profile
+            // Ensure events are wired (they may not have been if OnEnable ran
+            // before the manager existed).
             var manager = SupabaseLeaderboardManager.Instance;
+            if (manager != null)
+            {
+                manager.OnLeaderboardLoaded -= HandleLeaderboardLoaded;
+                manager.OnLeaderboardLoaded += HandleLeaderboardLoaded;
+                manager.OnLeaderboardError -= HandleLeaderboardError;
+                manager.OnLeaderboardError += HandleLeaderboardError;
+                manager.OnPlayerProfileUpdated -= HandlePlayerProfileUpdated;
+                manager.OnPlayerProfileUpdated += HandlePlayerProfileUpdated;
+            }
+
+            // Update personal profile
             if (manager != null && manager.CurrentPlayer != null)
             {
                 UpdateProfileDisplay(manager.CurrentPlayer);
@@ -249,7 +270,7 @@ namespace GitJumps.Leaderboard
             {
                 UpdateProfileDisplay(response.current_player);
             }
-            else if (SupabaseLeaderboardManager.Instance?.CurrentPlayer == null)
+            else if (SupabaseLeaderboardManager.InstanceIfExists?.CurrentPlayer == null)
             {
                 SetProfileGuestState();
             }
@@ -263,7 +284,7 @@ namespace GitJumps.Leaderboard
             if (emptyState != null) emptyState.style.display = DisplayStyle.None;
             if (scrollView != null) scrollView.style.display = DisplayStyle.None;
 
-            if (SupabaseLeaderboardManager.Instance?.CurrentPlayer == null)
+            if (SupabaseLeaderboardManager.InstanceIfExists?.CurrentPlayer == null)
             {
                 SetProfileGuestState();
             }
@@ -349,7 +370,7 @@ namespace GitJumps.Leaderboard
                 scrollView.style.display = DisplayStyle.Flex;
                 scrollView.Clear();
 
-                string myPlayerCode = SupabaseLeaderboardManager.Instance?.CurrentPlayer?.player_code;
+                string myPlayerCode = SupabaseLeaderboardManager.InstanceIfExists?.CurrentPlayer?.player_code;
 
                 for (int i = 0; i < entries.Length; i++)
                 {

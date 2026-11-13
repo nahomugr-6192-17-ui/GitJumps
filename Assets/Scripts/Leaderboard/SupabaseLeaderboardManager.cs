@@ -11,6 +11,12 @@ namespace GitJumps.Leaderboard
         private static SupabaseLeaderboardManager _instance;
         private static bool _isInstantiating = false;
 
+        /// <summary>
+        /// Returns the existing instance without ever creating one.
+        /// Use in OnEnable/OnDisable to avoid recursive prefab instantiation.
+        /// </summary>
+        public static SupabaseLeaderboardManager InstanceIfExists => _instance;
+
         public static SupabaseLeaderboardManager Instance
         {
             get

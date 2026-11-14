@@ -193,14 +193,23 @@
             updateBannerVisibility();
           }
 
+          // Force-purge legacy 1.0 UnityCache to guarantee removal of stale immutable binaries
+          if (window.caches && !localStorage.getItem("gj_unitycache_purged_v1_1")) {
+            try {
+              caches.delete("UnityCache_{{{ COMPANY_NAME }}}_{{{ PRODUCT_NAME }}}");
+              localStorage.setItem("gj_unitycache_purged_v1_1", "true");
+            } catch (e) {}
+          }
+
           var buildUrl = "Build";
-          var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+          var buildVersion = "?v=2";
+          var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}" + buildVersion;
 
           var config = {
             arguments: [],
-            dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
-            frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
-            codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+            dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}" + buildVersion,
+            frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}" + buildVersion,
+            codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}" + buildVersion,
             streamingAssetsUrl: "StreamingAssets",
             companyName: "{{{ COMPANY_NAME }}}",
             productName: "{{{ PRODUCT_NAME }}}",

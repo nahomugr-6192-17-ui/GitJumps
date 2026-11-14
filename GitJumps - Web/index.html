@@ -193,18 +193,27 @@
             updateBannerVisibility();
           }
 
+          // Force-purge legacy 1.0 UnityCache to guarantee removal of stale immutable binaries
+          if (window.caches && !localStorage.getItem("gj_unitycache_purged_v1_1")) {
+            try {
+              caches.delete("UnityCache_Papa Smurf_GitJumps");
+              localStorage.setItem("gj_unitycache_purged_v1_1", "true");
+            } catch (e) {}
+          }
+
           var buildUrl = "Build";
-          var loaderUrl = buildUrl + "/GitJumps - Web.loader.js";
+          var buildVersion = "?v=2";
+          var loaderUrl = buildUrl + "/GitJumps - Web.loader.js" + buildVersion;
 
           var config = {
             arguments: [],
-            dataUrl: buildUrl + "/GitJumps - Web.data.br",
-            frameworkUrl: buildUrl + "/GitJumps - Web.framework.js.br",
-            codeUrl: buildUrl + "/GitJumps - Web.wasm.br",
+            dataUrl: buildUrl + "/GitJumps - Web.data.br" + buildVersion,
+            frameworkUrl: buildUrl + "/GitJumps - Web.framework.js.br" + buildVersion,
+            codeUrl: buildUrl + "/GitJumps - Web.wasm.br" + buildVersion,
             streamingAssetsUrl: "StreamingAssets",
             companyName: "Papa Smurf",
             productName: "GitJumps",
-            productVersion: "1.0",
+            productVersion: "1.1",
             showBanner: unityShowBanner,
           };
 

@@ -34,7 +34,6 @@
 .leaderboard-title {
     font-size: 26px;
     color: rgb(255, 255, 255);
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&guid=719e9db23dd4a534bbee8afd8e7c6b81&type=3#MonaSans_SemiExpanded-Medium");
     -unity-font-style: bold;
 }
 
@@ -75,7 +74,6 @@
 .profile-name {
     font-size: 16px;
     color: rgb(255, 255, 255);
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&guid=719e9db23dd4a534bbee8afd8e7c6b81&type=3#MonaSans_SemiExpanded-Medium");
 }
 
 .profile-code {
@@ -102,7 +100,6 @@
 .profile-stat-value {
     font-size: 18px;
     color: rgb(255, 255, 255);
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&guid=719e9db23dd4a534bbee8afd8e7c6b81&type=3#MonaSans_SemiExpanded-Medium");
 }
 
 /* Three Columns Table */
@@ -126,7 +123,6 @@
 .table-header-col {
     color: rgb(180, 180, 180);
     font-size: 13px;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&guid=719e9db23dd4a534bbee8afd8e7c6b81&type=3#MonaSans_SemiExpanded-Medium");
 }
 
 .col-name {

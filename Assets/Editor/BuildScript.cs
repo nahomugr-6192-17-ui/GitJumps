@@ -38,12 +38,18 @@ public static class BuildScript
                 CopyIfExists(Path.Combine(buildDir, "GitJumps.loader.js"), Path.Combine(buildDir, "GitJumps - Web.loader.js"));
             }
 
-            EditorApplication.Exit(0);
+            if (Application.isBatchMode)
+            {
+                EditorApplication.Exit(0);
+            }
         }
         else
         {
             Debug.LogError("WebGL Build failed: " + summary.result + " with " + summary.totalErrors + " errors");
-            EditorApplication.Exit(1);
+            if (Application.isBatchMode)
+            {
+                EditorApplication.Exit(1);
+            }
         }
     }
 

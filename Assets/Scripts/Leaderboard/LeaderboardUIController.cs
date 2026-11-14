@@ -65,6 +65,10 @@ namespace GitJumps.Leaderboard
             _instance = this;
 
             uiDocument = GetComponent<UIDocument>();
+            if (uiDocument != null)
+            {
+                uiDocument.enabled = false;
+            }
         }
 
         private void OnDestroy()
@@ -115,9 +119,11 @@ namespace GitJumps.Leaderboard
 
         private void EnsureUIInitialized()
         {
-            if (_isUIInitialized) return;
             if (uiDocument == null) uiDocument = GetComponent<UIDocument>();
             if (uiDocument == null) return;
+            if (!uiDocument.enabled) uiDocument.enabled = true;
+
+            if (rootElement == uiDocument.rootVisualElement && _isUIInitialized) return;
 
             rootElement = uiDocument.rootVisualElement;
             if (rootElement == null) return;
@@ -171,6 +177,12 @@ namespace GitJumps.Leaderboard
 
         public void ShowLeaderboard()
         {
+            if (uiDocument == null) uiDocument = GetComponent<UIDocument>();
+            if (uiDocument != null && !uiDocument.enabled)
+            {
+                uiDocument.enabled = true;
+            }
+
             EnsureUIInitialized();
 
             if (leaderboardOverlay != null)
@@ -233,6 +245,12 @@ namespace GitJumps.Leaderboard
             {
                 leaderboardOverlay.style.display = DisplayStyle.None;
             }
+
+            if (uiDocument != null)
+            {
+                uiDocument.enabled = false;
+            }
+            _isUIInitialized = false;
         }
 
         public void RefreshLeaderboard()

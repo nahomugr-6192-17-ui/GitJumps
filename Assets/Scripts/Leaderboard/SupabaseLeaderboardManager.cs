@@ -87,11 +87,17 @@ namespace GitJumps.Leaderboard
 
         private void Start()
         {
-            // Automatically initialize player profile if credentials are configured
+            // Defer player initialization to let initial scene loading and WebGL stabilize
             if (IsConfigured())
             {
-                InitializePlayer();
+                StartCoroutine(DeferredInitRoutine());
             }
+        }
+
+        private IEnumerator DeferredInitRoutine()
+        {
+            yield return new WaitForSeconds(0.5f);
+            InitializePlayer();
         }
 
         public bool IsConfigured()

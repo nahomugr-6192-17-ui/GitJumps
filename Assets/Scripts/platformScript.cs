@@ -1,4 +1,4 @@
-﻿
+
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -22,6 +22,9 @@ public class platformScript : MonoBehaviour
     private int horizontalDirection = 1;
     public playerScript playerScript;
     public platformSpawnerScript spawnerController;
+    private Collider2D standingCollider;
+
+    public GameObject ActivePlatform => activePlatform;
 
     public void ScrollDown(float amount)
     {
@@ -49,8 +52,39 @@ public class platformScript : MonoBehaviour
 
     void FixedUpdate()
     {
-        PlatformMovement();
-        MoveActivePlatform();
+        // 1. Move container downward
+        Vector2 containerDelta = PlatformMovement();
+
+        // 2. Move active platform horizontally
+        Vector2 activePlatformDelta = MoveActivePlatform();
+
+        // 3. Carry the player with the platform's movement if standing on it
+        if (playerIsStandingOnThisPlatform && playerRb != null && playerScript != null && playerScript.isGrounded)
+        {
+            // Only carry horizontally if the player is standing on the active horizontal platform
+            bool isOnActivePlatform = (activePlatform != null &&
+                                       standingCollider != null &&
+                                       standingCollider.gameObject == activePlatform);
+
+            Vector2 horizontalMovement = isOnActivePlatform ? activePlatformDelta : Vector2.zero;
+            Vector2 carryMovement = containerDelta + horizontalMovement;
+
+            if (carryMovement.sqrMagnitude > 0f)
+            {
+                playerRb.position += carryMovement;
+            }
+
+            // Downward velocity matching to prevent bouncing and loss of contact
+            if (containerDelta.y < 0f)
+            {
+                float platformSpeedY = containerDelta.y / Time.fixedDeltaTime;
+                // Only lock downward velocity if player is resting/falling, not jumping upward
+                if (playerRb.linearVelocityY <= 0.1f)
+                {
+                    playerRb.linearVelocityY = platformSpeedY;
+                }
+            }
+        }
     }
 
     private void NumOfPlatforms()
@@ -103,13 +137,15 @@ public class platformScript : MonoBehaviour
     }
 
 
-    private void MoveActivePlatform()
+    private Vector2 MoveActivePlatform()
     {
         if (activePlatform == null || !activePlatform.activeSelf)
-            return;
+            return Vector2.zero;
 
-        float newX = activePlatform.transform.position.x
-            + horizontalDirection * horizontalSpeed * Time.deltaTime;
+        Vector3 previousPosition = activePlatform.transform.position;
+
+        float newX = previousPosition.x
+            + horizontalDirection * horizontalSpeed * Time.fixedDeltaTime;
 
         if (newX >= maxX)
         {
@@ -122,8 +158,6 @@ public class platformScript : MonoBehaviour
             horizontalDirection = 1;
         }
 
-        Vector3 previousPosition = activePlatform.transform.position;
-
         activePlatform.transform.position = new Vector3(
             newX,
             previousPosition.y,
@@ -133,30 +167,42 @@ public class platformScript : MonoBehaviour
         Vector3 movementDelta =
             activePlatform.transform.position - previousPosition;
 
-        if (playerIsStandingOnThisPlatform && playerRb != null)
-        {
-            playerRb.MovePosition(
-                playerRb.position + (Vector2)movementDelta
-            );
-        }
+        return (Vector2)movementDelta;
     }
 
     public void SetPlayerStanding(bool isStanding)
     {
         playerIsStandingOnThisPlatform = isStanding;
+        if (!isStanding)
+        {
+            standingCollider = null;
+        }
     }
 
-    private void PlatformMovement()
+    public void SetStandingPlatformCollider(Collider2D col)
+    {
+        standingCollider = col;
+    }
+
+    private Vector2 PlatformMovement()
     {
         if (spawnerController == null || playerScript == null)
-            return;
+            return Vector2.zero;
 
         if (playerScript.currentScore < 1)
-            return;
+            return Vector2.zero;
 
         float speed = spawnerController.CurrentPlatformSpeed;
 
-        transform.position += Vector3.down * speed * Time.deltaTime;
+        Vector3 previousPosition = transform.position;
+
+        transform.position +=
+            Vector3.down * speed * Time.fixedDeltaTime;
+
+        Vector3 movementDelta =
+            transform.position - previousPosition;
+
+        return (Vector2)movementDelta;
     }
 
     private int ProbabilisticRandomizer()

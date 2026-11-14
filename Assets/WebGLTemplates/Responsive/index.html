@@ -193,16 +193,16 @@
             updateBannerVisibility();
           }
 
-          // Force-purge legacy 1.0 UnityCache to guarantee removal of stale immutable binaries
-          if (window.caches && !localStorage.getItem("gj_unitycache_purged_v1_1")) {
+          // Force-purge legacy UnityCache to guarantee removal of stale immutable binaries
+          if (window.caches && !localStorage.getItem("gj_unitycache_purged_v1_3")) {
             try {
               caches.delete("UnityCache_{{{ COMPANY_NAME }}}_{{{ PRODUCT_NAME }}}");
-              localStorage.setItem("gj_unitycache_purged_v1_1", "true");
+              localStorage.setItem("gj_unitycache_purged_v1_3", "true");
             } catch (e) {}
           }
 
           var buildUrl = "Build";
-          var buildVersion = "?v=2";
+          var buildVersion = "?v=3";
           var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}" + buildVersion;
 
           var config = {

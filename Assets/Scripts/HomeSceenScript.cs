@@ -42,13 +42,22 @@ public class HomeSceenScript : MonoBehaviour
         LeaderboardButton = HomeScene.rootVisualElement.Q<Button>("LeaderboardButton");
         QuitButton = HomeScene.rootVisualElement.Q<Button>("QuitButton");
 
-        PlayButton.RegisterCallback<ClickEvent>(OnPlayClicked);
-        HowToButton.RegisterCallback<ClickEvent>(OnHowToClicked);
+        if (PlayButton != null)
+        {
+            PlayButton.clicked += () => OnPlayClicked(null);
+        }
+        if (HowToButton != null)
+        {
+            HowToButton.clicked += () => OnHowToClicked(null);
+        }
         if (LeaderboardButton != null)
         {
-            LeaderboardButton.RegisterCallback<ClickEvent>(OnLeaderboardClicked);
+            LeaderboardButton.clicked += () => OnLeaderboardClicked(null);
         }
-        QuitButton.RegisterCallback<ClickEvent>(OnQuitClicked);
+        if (QuitButton != null)
+        {
+            QuitButton.clicked += () => OnQuitClicked(null);
+        }
     }
 
     void Update()

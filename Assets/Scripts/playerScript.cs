@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
@@ -19,6 +19,7 @@ public class playerScript : MonoBehaviour
     public int currentScore = 0;
     private int highScore = 0;
     private platformScript standingPlatform;
+    private Collider2D standingPlatformCollider;
     public platformSpawnerScript spawnerController;
     public bool isCoolingPlatformSpeed = false;
     public float platformSpeedCoolingRate = 1f;
@@ -196,6 +197,10 @@ public class playerScript : MonoBehaviour
             if (contact.normal.y <= 0.5f)
                 continue;
 
+            // Don't land/attach while actively jumping upward
+            if (rb.linearVelocityY > 0.1f)
+                continue;
+
             isGrounded = true;
 
             if (collision.gameObject.CompareTag("Platform"))
@@ -221,15 +226,7 @@ public class playerScript : MonoBehaviour
 
                 if (newPlatform != null)
                 {
-                    if (standingPlatform != null &&
-                        standingPlatform != newPlatform)
-                    {
-                        standingPlatform.SetPlayerStanding(false);
-                    }
-
-                    standingPlatform = newPlatform;
-                    standingPlatform.player = transform;
-                    standingPlatform.SetPlayerStanding(true);
+                    AttachToPlatform(collision.collider, newPlatform);
                 }
             }
             else
@@ -238,6 +235,71 @@ public class playerScript : MonoBehaviour
             }
 
             break;
+        }
+    }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        if (!collision.gameObject.CompareTag("Platform") &&
+            !collision.gameObject.CompareTag("Floor"))
+        {
+            return;
+        }
+
+        foreach (ContactPoint2D contact in collision.contacts)
+        {
+            if (contact.normal.y <= 0.5f)
+                continue;
+
+            if (rb.linearVelocityY > 0.1f)
+                continue;
+
+            isGrounded = true;
+
+            if (collision.gameObject.CompareTag("Platform"))
+            {
+                platformScript pScript =
+                    collision.gameObject.GetComponentInParent<platformScript>();
+
+                if (pScript != null && (standingPlatform != pScript || standingPlatformCollider != collision.collider))
+                {
+                    AttachToPlatform(collision.collider, pScript);
+                }
+            }
+            break;
+        }
+    }
+
+    private void AttachToPlatform(
+        Collider2D platformCollider,
+        platformScript platformController)
+    {
+        if (platformCollider == null || platformController == null)
+            return;
+
+        if (standingPlatform != null && standingPlatform != platformController)
+        {
+            standingPlatform.SetPlayerStanding(false);
+            standingPlatform.SetStandingPlatformCollider(null);
+        }
+
+        standingPlatform = platformController;
+        standingPlatformCollider = platformCollider;
+
+        standingPlatform.player = transform;
+        standingPlatform.SetStandingPlatformCollider(platformCollider);
+        standingPlatform.SetPlayerStanding(true);
+
+        isGrounded = true;
+
+        // Immediately synchronize downward velocity with the descending platform
+        if (spawnerController != null && currentScore >= 1)
+        {
+            rb.linearVelocityY = -spawnerController.CurrentPlatformSpeed;
+        }
+        else
+        {
+            rb.linearVelocityY = 0f;
         }
     }
 
@@ -346,37 +408,34 @@ public class playerScript : MonoBehaviour
     }
     void OnCollisionExit2D(Collision2D collision)
     {
-
         if (collision.gameObject.CompareTag("Platform") ||
-    collision.gameObject.CompareTag("Floor"))
+            collision.gameObject.CompareTag("Floor"))
         {
             isCoolingPlatformSpeed = true;
         }
-        if (collision.gameObject.CompareTag("Floor") ||
-            collision.gameObject.CompareTag("Platform"))
+
+        if (standingPlatformCollider != null &&
+            collision.collider == standingPlatformCollider)
+        {
+            StopPlatformCarry();
+            isGrounded = false;
+        }
+        else if (collision.gameObject.CompareTag("Floor"))
         {
             isGrounded = false;
         }
-
-        // Stop carrying only if the player left the platform
-        // controlled by this particular platformScript.
-        platformScript exitedPlatform =
-            collision.gameObject.GetComponentInParent<platformScript>();
-
-        if (standingPlatform != null &&
-            exitedPlatform == standingPlatform)
-        {
-            StopPlatformCarry();
-        }
     }
 
-    private void StopPlatformCarry()
+    public void StopPlatformCarry()
     {
         if (standingPlatform != null)
         {
             standingPlatform.SetPlayerStanding(false);
+            standingPlatform.SetStandingPlatformCollider(null);
             standingPlatform = null;
         }
+
+        standingPlatformCollider = null;
     }
 
     private void Jump()

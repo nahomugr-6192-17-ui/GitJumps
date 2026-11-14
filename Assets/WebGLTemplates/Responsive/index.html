@@ -193,27 +193,35 @@
             updateBannerVisibility();
           }
 
-          // Force-purge legacy UnityCache to guarantee removal of stale immutable binaries
-          if (window.caches && !localStorage.getItem("gj_unitycache_purged_v1_3")) {
-            try {
-              caches.delete("UnityCache_{{{ COMPANY_NAME }}}_{{{ PRODUCT_NAME }}}");
-              localStorage.setItem("gj_unitycache_purged_v1_3", "true");
-            } catch (e) {}
-          }
+          // Force-purge legacy caches and IndexedDB to guarantee removal of stale immutable binaries
+          try {
+            if (window.caches) {
+              caches.keys().then(function(names) {
+                names.forEach(function(name) { caches.delete(name); });
+              });
+            }
+          } catch(e) {}
+
+          try {
+            if (window.indexedDB) {
+              ["UnityCache", "UnityCache_{{{ COMPANY_NAME }}}_{{{ PRODUCT_NAME }}}"].forEach(function(dbName) {
+                try { indexedDB.deleteDatabase(dbName); } catch(e) {}
+              });
+            }
+          } catch(e) {}
 
           var buildUrl = "Build";
-          var buildVersion = "?v=3";
-          var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}" + buildVersion;
+          var loaderUrl = buildUrl + "/GitJumps_v4.loader.js";
 
           var config = {
             arguments: [],
-            dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}" + buildVersion,
-            frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}" + buildVersion,
-            codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}" + buildVersion,
+            dataUrl: buildUrl + "/GitJumps_v4.data.br",
+            frameworkUrl: buildUrl + "/GitJumps_v4.framework.js.br",
+            codeUrl: buildUrl + "/GitJumps_v4.wasm.br",
             streamingAssetsUrl: "StreamingAssets",
             companyName: "{{{ COMPANY_NAME }}}",
             productName: "{{{ PRODUCT_NAME }}}",
-            productVersion: "{{{ PRODUCT_VERSION }}}",
+            productVersion: "1.4",
             showBanner: unityShowBanner,
           };
 

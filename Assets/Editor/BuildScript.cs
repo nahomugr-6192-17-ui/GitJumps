@@ -28,7 +28,7 @@ public static class BuildScript
         {
             Debug.Log("WebGL Build succeeded: " + summary.totalSize + " bytes in " + summary.totalTime.TotalSeconds + " s");
 
-            // Ensure synchronization across both filename formats (GitJumps.* and GitJumps - Web.*)
+            // Ensure synchronization across filename formats
             string buildDir = Path.Combine("GitJumps - Web", "Build");
             if (Directory.Exists(buildDir))
             {
@@ -36,6 +36,11 @@ public static class BuildScript
                 CopyIfExists(Path.Combine(buildDir, "GitJumps.framework.js.br"), Path.Combine(buildDir, "GitJumps - Web.framework.js.br"));
                 CopyIfExists(Path.Combine(buildDir, "GitJumps.wasm.br"), Path.Combine(buildDir, "GitJumps - Web.wasm.br"));
                 CopyIfExists(Path.Combine(buildDir, "GitJumps.loader.js"), Path.Combine(buildDir, "GitJumps - Web.loader.js"));
+
+                CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.data.br"), Path.Combine(buildDir, "GitJumps_v4.data.br"));
+                CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.framework.js.br"), Path.Combine(buildDir, "GitJumps_v4.framework.js.br"));
+                CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.wasm.br"), Path.Combine(buildDir, "GitJumps_v4.wasm.br"));
+                CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.loader.js"), Path.Combine(buildDir, "GitJumps_v4.loader.js"));
             }
 
             if (Application.isBatchMode)

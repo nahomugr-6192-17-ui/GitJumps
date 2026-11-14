@@ -18,8 +18,7 @@ namespace GitJumps.Leaderboard
         /// <summary>
         /// Returns the singleton instance if one exists in the scene.
         /// Never instantiates a prefab — the LeaderboardManager must be placed
-        /// in each scene that needs it. This eliminates the cross-class recursive
-        /// Instantiate loop that caused "too much recursion" in WebGL.
+        /// in each scene that needs it.
         /// </summary>
         public static LeaderboardUIController Instance
         {
@@ -35,6 +34,7 @@ namespace GitJumps.Leaderboard
 
         private UIDocument uiDocument;
         private VisualElement rootElement;
+        private bool _isUIInitialized = false;
 
         // UI Elements
         private VisualElement leaderboardOverlay;
@@ -58,6 +58,7 @@ namespace GitJumps.Leaderboard
         {
             if (_instance != null && _instance != this)
             {
+                gameObject.SetActive(false);
                 Destroy(gameObject);
                 return;
             }
@@ -76,14 +77,7 @@ namespace GitJumps.Leaderboard
 
         private void OnEnable()
         {
-            rootElement = uiDocument.rootVisualElement;
-            if (rootElement == null) return;
-
-            QueryUIElements();
-            RegisterCallbacks();
-
-            // Use the backing field to avoid triggering recursive prefab instantiation.
-            // If the manager hasn't been created yet, events will be wired when ShowLeaderboard() runs.
+            // Subscribe to manager events safely without touching the visual tree yet
             var manager = SupabaseLeaderboardManager.InstanceIfExists;
             if (manager != null)
             {
@@ -96,7 +90,7 @@ namespace GitJumps.Leaderboard
                 manager.OnPlayerProfileUpdated -= HandlePlayerProfileUpdated;
                 manager.OnPlayerProfileUpdated += HandlePlayerProfileUpdated;
 
-                if (manager.CurrentPlayer != null)
+                if (_isUIInitialized && manager.CurrentPlayer != null)
                 {
                     UpdateProfileDisplay(manager.CurrentPlayer);
                 }
@@ -105,9 +99,11 @@ namespace GitJumps.Leaderboard
 
         private void OnDisable()
         {
-            UnregisterCallbacks();
+            if (_isUIInitialized)
+            {
+                UnregisterCallbacks();
+            }
 
-            // Use the backing field — never instantiate a new manager during teardown.
             var manager = SupabaseLeaderboardManager.InstanceIfExists;
             if (manager != null)
             {
@@ -115,6 +111,20 @@ namespace GitJumps.Leaderboard
                 manager.OnLeaderboardError -= HandleLeaderboardError;
                 manager.OnPlayerProfileUpdated -= HandlePlayerProfileUpdated;
             }
+        }
+
+        private void EnsureUIInitialized()
+        {
+            if (_isUIInitialized) return;
+            if (uiDocument == null) uiDocument = GetComponent<UIDocument>();
+            if (uiDocument == null) return;
+
+            rootElement = uiDocument.rootVisualElement;
+            if (rootElement == null) return;
+
+            QueryUIElements();
+            RegisterCallbacks();
+            _isUIInitialized = true;
         }
 
         private void QueryUIElements()
@@ -161,16 +171,13 @@ namespace GitJumps.Leaderboard
 
         public void ShowLeaderboard()
         {
-            if (leaderboardOverlay == null)
-                QueryUIElements();
+            EnsureUIInitialized();
 
             if (leaderboardOverlay != null)
             {
                 leaderboardOverlay.style.display = DisplayStyle.Flex;
             }
 
-            // Ensure events are wired (they may not have been if OnEnable ran
-            // before the manager existed).
             var manager = SupabaseLeaderboardManager.Instance;
             if (manager != null)
             {
@@ -180,38 +187,41 @@ namespace GitJumps.Leaderboard
                 manager.OnLeaderboardError += HandleLeaderboardError;
                 manager.OnPlayerProfileUpdated -= HandlePlayerProfileUpdated;
                 manager.OnPlayerProfileUpdated += HandlePlayerProfileUpdated;
-            }
 
-            // Update personal profile
-            if (manager != null && manager.CurrentPlayer != null)
-            {
-                UpdateProfileDisplay(manager.CurrentPlayer);
-            }
-            else
-            {
-                string authData = manager != null ? manager.GetTelegramAuthData() : null;
-                if (string.IsNullOrEmpty(authData))
+                if (manager.CurrentPlayer != null)
                 {
-                    SetProfileGuestState();
+                    UpdateProfileDisplay(manager.CurrentPlayer);
                 }
                 else
                 {
-                    SetProfileLoadingState();
-                    if (manager != null)
+                    string authData = manager.GetTelegramAuthData();
+                    if (string.IsNullOrEmpty(authData))
                     {
-                        manager.InitializePlayer((res) =>
+                        SetProfileGuestState();
+                    }
+                    else
+                    {
+                        SetProfileLoadingState();
+                        if (!manager.IsInitializingPlayer)
                         {
-                            if (res != null && res.player != null)
+                            manager.InitializePlayer((res) =>
                             {
-                                UpdateProfileDisplay(res.player);
-                            }
-                            else
-                            {
-                                SetProfileGuestState();
-                            }
-                        });
+                                if (res != null && res.player != null)
+                                {
+                                    UpdateProfileDisplay(res.player);
+                                }
+                                else
+                                {
+                                    SetProfileGuestState();
+                                }
+                            });
+                        }
                     }
                 }
+            }
+            else
+            {
+                SetProfileGuestState();
             }
 
             RefreshLeaderboard();
@@ -227,12 +237,12 @@ namespace GitJumps.Leaderboard
 
         public void RefreshLeaderboard()
         {
+            EnsureUIInitialized();
             SetLoadingState();
 
             var manager = SupabaseLeaderboardManager.Instance;
             if (manager != null)
             {
-                // Events already wired to HandleLeaderboardLoaded and HandleLeaderboardError
                 manager.FetchLeaderboard();
             }
             else
@@ -243,6 +253,8 @@ namespace GitJumps.Leaderboard
 
         private void HandleLeaderboardLoaded(LeaderboardResponse response)
         {
+            if (!_isUIInitialized) return;
+
             if (response == null || !response.success || response.leaderboard == null)
             {
                 HandleLeaderboardError(response?.error ?? "Failed to load leaderboard data.");
@@ -263,6 +275,8 @@ namespace GitJumps.Leaderboard
 
         private void HandleLeaderboardError(string error)
         {
+            if (!_isUIInitialized) return;
+
             if (loadingState != null) loadingState.style.display = DisplayStyle.None;
             if (emptyState != null) emptyState.style.display = DisplayStyle.None;
             if (scrollView != null) scrollView.style.display = DisplayStyle.None;
@@ -284,7 +298,10 @@ namespace GitJumps.Leaderboard
 
         private void HandlePlayerProfileUpdated(PlayerProfile profile)
         {
-            UpdateProfileDisplay(profile);
+            if (_isUIInitialized)
+            {
+                UpdateProfileDisplay(profile);
+            }
         }
 
         private void SetLoadingState()
@@ -398,4 +415,3 @@ namespace GitJumps.Leaderboard
         }
     }
 }
-

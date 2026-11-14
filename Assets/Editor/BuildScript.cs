@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using System.IO;
 
 public static class BuildScript
 {
@@ -26,6 +27,17 @@ public static class BuildScript
         if (summary.result == BuildResult.Succeeded)
         {
             Debug.Log("WebGL Build succeeded: " + summary.totalSize + " bytes in " + summary.totalTime.TotalSeconds + " s");
+
+            // Ensure synchronization across both filename formats (GitJumps.* and GitJumps - Web.*)
+            string buildDir = Path.Combine("GitJumps - Web", "Build");
+            if (Directory.Exists(buildDir))
+            {
+                CopyIfExists(Path.Combine(buildDir, "GitJumps.data.br"), Path.Combine(buildDir, "GitJumps - Web.data.br"));
+                CopyIfExists(Path.Combine(buildDir, "GitJumps.framework.js.br"), Path.Combine(buildDir, "GitJumps - Web.framework.js.br"));
+                CopyIfExists(Path.Combine(buildDir, "GitJumps.wasm.br"), Path.Combine(buildDir, "GitJumps - Web.wasm.br"));
+                CopyIfExists(Path.Combine(buildDir, "GitJumps.loader.js"), Path.Combine(buildDir, "GitJumps - Web.loader.js"));
+            }
+
             EditorApplication.Exit(0);
         }
         else
@@ -34,5 +46,12 @@ public static class BuildScript
             EditorApplication.Exit(1);
         }
     }
-}
 
+    private static void CopyIfExists(string src, string dst)
+    {
+        if (File.Exists(src))
+        {
+            File.Copy(src, dst, true);
+        }
+    }
+}

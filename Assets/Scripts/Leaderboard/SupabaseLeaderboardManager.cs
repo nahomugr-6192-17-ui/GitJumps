@@ -68,6 +68,7 @@ namespace GitJumps.Leaderboard
         {
             if (_instance != null && _instance != this)
             {
+                gameObject.SetActive(false);
                 Destroy(gameObject);
                 return;
             }

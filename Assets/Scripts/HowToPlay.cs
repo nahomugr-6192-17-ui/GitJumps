@@ -28,6 +28,9 @@ public class HowToPlay : MonoBehaviour
         }
 
         PlayButtonInHTP.clicked += OnHowToPlayCompleted;
+
+        // Start or continue persistent background music
+        AudioManager.Instance?.PlayBackgroundMusic();
     }
 
     private void OnHowToPlayCompleted()

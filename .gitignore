@@ -116,3 +116,7 @@ InitTestScene*.unity*
 # Burst debug information
 *_BurstDebugInformation_DoNotShip/
 
+# Admin Dashboard
+admin/
+/admin/
+

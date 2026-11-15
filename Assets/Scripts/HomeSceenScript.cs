@@ -58,6 +58,9 @@ public class HomeSceenScript : MonoBehaviour
         {
             QuitButton.clicked += () => OnQuitClicked(null);
         }
+
+        // Start or continue persistent background music
+        AudioManager.Instance?.PlayBackgroundMusic();
     }
 
     void Update()
@@ -155,6 +158,8 @@ public class HomeSceenScript : MonoBehaviour
 
     private void OnPlayClicked(ClickEvent ev)
     {
+        GitJumps.Leaderboard.SupabaseLeaderboardManager.Instance?.TrackGameStarted();
+
         bool tutorialCompleted =
             PlayerPrefs.GetInt(TutorialCompletedKey, 0) == 1;
 

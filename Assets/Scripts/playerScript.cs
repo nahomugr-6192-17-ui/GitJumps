@@ -74,6 +74,7 @@ public class playerScript : MonoBehaviour
     private Button LeaderboardButton;
     private bool gameOverHandled = false;
     private bool gameOverUIShown = false;
+    private bool gameOverSoundPlayed = false;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -103,6 +104,12 @@ public class playerScript : MonoBehaviour
         {
             LeaderboardButton.clicked += OpenLeaderboard;
         }
+
+        // Telemetry: record gameplay start (non-blocking)
+        GitJumps.Leaderboard.SupabaseLeaderboardManager.Instance?.TrackGameStarted();
+
+        // Start background music when gameplay begins
+        AudioManager.Instance?.PlayBackgroundMusic();
     }
 
     // Update is called once per frame
@@ -169,6 +176,10 @@ public class playerScript : MonoBehaviour
             gameOverUI.rootVisualElement.style.display = DisplayStyle.None;
         }
         ActivateSprintBlocker();
+        if ((isGameOver || transform.position.y <= gameOverTriggerY) && !gameOverSoundPlayed)
+        {
+            TriggerGameOverAudio();
+        }
         GameOver();
         UpdateGameOverTrigger();
     }
@@ -440,6 +451,8 @@ public class playerScript : MonoBehaviour
 
     private void Jump()
     {
+        AudioManager.Instance?.PlayJump();
+
         isCoolingPlatformSpeed = false;
         isCommitTriggered = false;
         StopPlatformCarry();
@@ -563,6 +576,7 @@ public class playerScript : MonoBehaviour
             isBugTriggered = true;
             playerIsFalling = true;
             isGameOver = true;
+            TriggerGameOverAudio();
             BugCollision();
             Destroy(collision.gameObject);
             if (Commit != null) Destroy(Commit);
@@ -729,7 +743,17 @@ public class playerScript : MonoBehaviour
 
         buttonsEnabled = false;
 
+        TriggerGameOverAudio();
+
         GameOverScenes();
+    }
+
+    public void TriggerGameOverAudio()
+    {
+        if (gameOverSoundPlayed) return;
+        gameOverSoundPlayed = true;
+
+        AudioManager.Instance?.PlayGameOver();
     }
 
 

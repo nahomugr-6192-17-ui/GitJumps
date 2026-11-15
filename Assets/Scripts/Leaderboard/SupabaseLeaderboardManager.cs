@@ -344,6 +344,41 @@ namespace GitJumps.Leaderboard
             return !string.IsNullOrEmpty(req.error) ? req.error : "Connection Failed";
         }
 
+        [Serializable]
+        private class TrackEventPayload
+        {
+            public string initData;
+            public string event_name;
+        }
+
+        /// <summary>
+        /// Sends a lightweight non-blocking telemetry event when gameplay starts.
+        /// </summary>
+        public void TrackGameStarted()
+        {
+            StartCoroutine(TrackGameStartedRoutine());
+        }
+
+        private IEnumerator TrackGameStartedRoutine()
+        {
+            string initData = GetTelegramAuthData();
+            if (string.IsNullOrEmpty(initData)) yield break;
+
+            string url = $"{supabaseUrl.TrimEnd('/')}/functions/v1/track-gameplay-event";
+            var payload = new TrackEventPayload
+            {
+                initData = initData,
+                event_name = "game_started"
+            };
+            string jsonBody = JsonUtility.ToJson(payload);
+
+            using (UnityWebRequest req = CreatePostRequest(url, jsonBody))
+            {
+                yield return req.SendWebRequest();
+                // Non-blocking fire-and-forget; never interrupt gameplay or show errors
+            }
+        }
+
         private UnityWebRequest CreatePostRequest(string url, string jsonBody)
         {
             UnityWebRequest req = new UnityWebRequest(url, "POST");

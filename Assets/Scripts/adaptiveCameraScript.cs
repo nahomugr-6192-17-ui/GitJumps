@@ -46,7 +46,12 @@ public class adaptiveCameraScript : MonoBehaviour
         else
         {
             cam.orthographicSize = baselineOrthoSize;
-            transform.position = new Vector3(transform.position.x, baselineCameraY, transform.position.z);
+            float effectiveY = baselineCameraY;
+            if (!ResponsiveGameplayScaler.IsDesktopLayout() || cam.aspect > 1.85f)
+            {
+                effectiveY = -0.5f;
+            }
+            transform.position = new Vector3(transform.position.x, effectiveY, transform.position.z);
         }
     }
 }

@@ -218,7 +218,7 @@ public class platformSpawnerScript : MonoBehaviour
             {
                 LandingBlock.transform.localScale = defaultLandingBlockScale * scaleFactor;
                 // Floor is at y = -9.71, player's feet are at y = -8.5.
-                // Position LandingBlock at y = -6.0f so the player can effortlessly reach and land on it.
+                // Position LandingBlock at y = -5.7f so the player can effortlessly reach and land on it.
                 LandingBlock.transform.position = new Vector3(LandingBlock.transform.position.x, -6.0f, LandingBlock.transform.position.z);
             }
         }

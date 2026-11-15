@@ -8,17 +8,17 @@
             </ui:VisualElement>
             <ui:VisualElement name="ProfileArea" class="profile-card">
                 <ui:VisualElement class="profile-player-info">
-                    <ui:Label text="Player Name" name="ProfileDisplayName" class="profile-name" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&amp;guid=719e9db23dd4a534bbee8afd8e7c6b81&amp;type=3#MonaSans_SemiExpanded-Medium&quot;);"/>
-                    <ui:Label text="GJ-0000" name="ProfilePlayerCode" class="profile-code" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&amp;guid=719e9db23dd4a534bbee8afd8e7c6b81&amp;type=3#MonaSans_SemiExpanded-Medium&quot;);"/>
+                    <ui:Label text="Player Name" name="ProfileDisplayName" class="profile-name" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/MonaSans-VariableFont_wdth,wght.ttf?fileID=12800000&amp;guid=ead757a2fc4d3d24fbde2e097d5b476d&amp;type=3#MonaSans-VariableFont_wdth,wght&quot;);"/>
+                    <ui:Label text="GJ-0000" name="ProfilePlayerCode" class="profile-code" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/MonaSans-VariableFont_wdth,wght.ttf?fileID=12800000&amp;guid=ead757a2fc4d3d24fbde2e097d5b476d&amp;type=3#MonaSans-VariableFont_wdth,wght&quot;);"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="profile-stats">
                     <ui:VisualElement class="profile-stat-item">
                         <ui:Label text="BEST SCORE" class="profile-stat-label" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&amp;guid=719e9db23dd4a534bbee8afd8e7c6b81&amp;type=3#MonaSans_SemiExpanded-Medium&quot;);"/>
-                        <ui:Label text="0" name="ProfileBestScore" class="profile-stat-value" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&amp;guid=719e9db23dd4a534bbee8afd8e7c6b81&amp;type=3#MonaSans_SemiExpanded-Medium&quot;);"/>
+                        <ui:Label text="0" name="ProfileBestScore" class="profile-stat-value" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/MonaSans-VariableFont_wdth,wght.ttf?fileID=12800000&amp;guid=ead757a2fc4d3d24fbde2e097d5b476d&amp;type=3#MonaSans-VariableFont_wdth,wght&quot;);"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="profile-stat-item">
-                        <ui:Label text="GLOBAL RANK" class="profile-stat-label"/>
-                        <ui:Label text="-" name="ProfileGlobalRank" class="profile-stat-value"/>
+                        <ui:Label text="GLOBAL RANK" class="profile-stat-label" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/MonaSans_SemiExpanded-Medium.ttf?fileID=12800000&amp;guid=719e9db23dd4a534bbee8afd8e7c6b81&amp;type=3#MonaSans_SemiExpanded-Medium&quot;);"/>
+                        <ui:Label text="-" name="ProfileGlobalRank" class="profile-stat-value" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/MonaSans-VariableFont_wdth,wght.ttf?fileID=12800000&amp;guid=ead757a2fc4d3d24fbde2e097d5b476d&amp;type=3#MonaSans-VariableFont_wdth,wght&quot;);"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>

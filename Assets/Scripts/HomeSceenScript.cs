@@ -11,7 +11,6 @@ public class HomeSceenScript : MonoBehaviour
     private Button PlayButton;
     private Button HowToButton;
     private Button LeaderboardButton;
-    private Button QuitButton;
 
     private const string TutorialCompletedKey = "HasCompletedHowToPlay";
 
@@ -40,7 +39,6 @@ public class HomeSceenScript : MonoBehaviour
         PlayButton = HomeScene.rootVisualElement.Q<Button>("PlayButton");
         HowToButton = HomeScene.rootVisualElement.Q<Button>("HowToButton");
         LeaderboardButton = HomeScene.rootVisualElement.Q<Button>("LeaderboardButton");
-        QuitButton = HomeScene.rootVisualElement.Q<Button>("QuitButton");
 
         if (PlayButton != null)
         {
@@ -53,10 +51,6 @@ public class HomeSceenScript : MonoBehaviour
         if (LeaderboardButton != null)
         {
             LeaderboardButton.clicked += () => OnLeaderboardClicked(null);
-        }
-        if (QuitButton != null)
-        {
-            QuitButton.clicked += () => OnQuitClicked(null);
         }
 
         // Start or continue persistent background music
@@ -188,8 +182,4 @@ public class HomeSceenScript : MonoBehaviour
         }
     }
 
-    private void OnQuitClicked(ClickEvent ev)
-    {
-        Application.Quit();
-    }
 }

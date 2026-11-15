@@ -75,6 +75,20 @@ public class playerScript : MonoBehaviour
     private bool gameOverHandled = false;
     private bool gameOverUIShown = false;
     private bool gameOverSoundPlayed = false;
+
+    [Header("Mobile / Tablet Landscape Controls")]
+    private bool isMobileLeftHeld = false;
+    private bool isMobileRightHeld = false;
+    private bool isMobileJumpHeld = false;
+    private VisualElement mobileControlsRoot;
+    private Button btnMoveLeft;
+    private Button btnMoveRight;
+    private Button btnJump;
+    private Vector3 initialPlayerScale;
+    private float initialMoveSpeed;
+    private float initialJumpForce;
+    private float initialGameOverTriggerY;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -105,6 +119,29 @@ public class playerScript : MonoBehaviour
             LeaderboardButton.clicked += OpenLeaderboard;
         }
 
+        initialPlayerScale = transform.localScale;
+        initialMoveSpeed = moveSpeed;
+        initialJumpForce = jumpForce;
+        initialGameOverTriggerY = gameOverTriggerY;
+
+        ApplyGameplayScale(ResponsiveGameplayScaler.CurrentScaleFactor);
+        ResponsiveGameplayScaler.OnLayoutChanged += OnLayoutChangedHandler;
+
+        // Initialize mobile on-screen controls
+        if (currentScoreUI != null && currentScoreUI.rootVisualElement != null)
+        {
+            mobileControlsRoot = currentScoreUI.rootVisualElement.Q<VisualElement>("mobile-controls-root");
+            btnMoveLeft = currentScoreUI.rootVisualElement.Q<Button>("btn-move-left");
+            btnMoveRight = currentScoreUI.rootVisualElement.Q<Button>("btn-move-right");
+            btnJump = currentScoreUI.rootVisualElement.Q<Button>("btn-jump");
+
+            UpdateMobileControlsDisplay(ResponsiveGameplayScaler.ActiveLayoutMode, ResponsiveGameplayScaler.CurrentScaleFactor);
+
+            SetupTouchButton(btnMoveLeft, held => isMobileLeftHeld = held);
+            SetupTouchButton(btnMoveRight, held => isMobileRightHeld = held);
+            SetupTouchButton(btnJump, held => isMobileJumpHeld = held);
+        }
+
         // Telemetry: record gameplay start (non-blocking)
         GitJumps.Leaderboard.SupabaseLeaderboardManager.Instance?.TrackGameStarted();
 
@@ -112,28 +149,140 @@ public class playerScript : MonoBehaviour
         AudioManager.Instance?.PlayBackgroundMusic();
     }
 
+    private void OnDestroy()
+    {
+        ResponsiveGameplayScaler.OnLayoutChanged -= OnLayoutChangedHandler;
+    }
+
+    private void OnLayoutChangedHandler(DeviceLayoutMode mode, float scaleFactor)
+    {
+        ApplyGameplayScale(scaleFactor);
+        UpdateMobileControlsDisplay(mode, scaleFactor);
+    }
+
+    private void ApplyGameplayScale(float scaleFactor)
+    {
+        if (scaleFactor <= 0f) scaleFactor = 1f;
+
+        if (ResponsiveGameplayScaler.IsDesktopLayout())
+        {
+            // Desktop: restore exact 100% desktop scale and speeds
+            transform.localScale = initialPlayerScale;
+            moveSpeed = initialMoveSpeed;
+            jumpForce = initialJumpForce;
+            gameOverTriggerY = initialGameOverTriggerY;
+        }
+        else
+        {
+            // Mobile or Tablet: scale player size and proportional physics
+            transform.localScale = initialPlayerScale * scaleFactor;
+            moveSpeed = initialMoveSpeed;
+            // Provide strong jumpForce so player easily reaches the landing block and subsequent platforms
+            jumpForce = initialJumpForce * 1.07f;
+            gameOverTriggerY = initialGameOverTriggerY;
+        }
+    }
+
+    private void UpdateMobileControlsDisplay(DeviceLayoutMode mode, float scaleFactor)
+    {
+        if (mobileControlsRoot == null) return;
+
+        if (mode == DeviceLayoutMode.Desktop)
+        {
+            // Desktop: keep desktop layout the way it is! Hide on-screen touch buttons
+            mobileControlsRoot.style.display = DisplayStyle.None;
+            isMobileLeftHeld = false;
+            isMobileRightHeld = false;
+            isMobileJumpHeld = false;
+        }
+        else
+        {
+            // Mobile / Tablet: display touch buttons
+            mobileControlsRoot.style.display = DisplayStyle.Flex;
+
+            float btnSize = (mode == DeviceLayoutMode.Tablet) ? 140f : 126f;
+            float jumpBtnWidth = (mode == DeviceLayoutMode.Tablet) ? 180f : 160f;
+            float jumpBtnHeight = (mode == DeviceLayoutMode.Tablet) ? 140f : 126f;
+
+            if (btnMoveLeft != null)
+            {
+                btnMoveLeft.style.width = btnSize;
+                btnMoveLeft.style.height = btnSize;
+            }
+            if (btnMoveRight != null)
+            {
+                btnMoveRight.style.width = btnSize;
+                btnMoveRight.style.height = btnSize;
+            }
+            if (btnJump != null)
+            {
+                btnJump.style.width = jumpBtnWidth;
+                btnJump.style.height = jumpBtnHeight;
+            }
+        }
+    }
+
+    private void SetupTouchButton(Button btn, System.Action<bool> stateSetter)
+    {
+        if (btn == null) return;
+
+        btn.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            stateSetter(true);
+            btn.CapturePointer(evt.pointerId);
+            btn.style.backgroundColor = new StyleColor(new Color(0.22f, 0.28f, 0.38f, 0.95f));
+        });
+
+        btn.RegisterCallback<PointerUpEvent>(evt =>
+        {
+            stateSetter(false);
+            if (btn.HasPointerCapture(evt.pointerId))
+                btn.ReleasePointer(evt.pointerId);
+            btn.style.backgroundColor = new StyleColor(new Color(0.07f, 0.09f, 0.13f, 0.78f));
+        });
+
+        btn.RegisterCallback<PointerCancelEvent>(evt =>
+        {
+            stateSetter(false);
+            if (btn.HasPointerCapture(evt.pointerId))
+                btn.ReleasePointer(evt.pointerId);
+            btn.style.backgroundColor = new StyleColor(new Color(0.07f, 0.09f, 0.13f, 0.78f));
+        });
+
+        btn.RegisterCallback<PointerLeaveEvent>(evt =>
+        {
+            if (!btn.HasPointerCapture(evt.pointerId))
+            {
+                stateSetter(false);
+                btn.style.backgroundColor = new StyleColor(new Color(0.07f, 0.09f, 0.13f, 0.78f));
+            }
+        });
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (Keyboard.current == null)
-            return;
-        if (buttonsEnabled == true && !isGameOver)
+        bool leftPressed = isMobileLeftHeld;
+        bool rightPressed = isMobileRightHeld;
+        bool jumpPressed = isMobileJumpHeld;
+
+        if (Keyboard.current != null)
         {
-            bool leftPressed =
+            leftPressed |=
                 Keyboard.current.aKey.isPressed ||
                 Keyboard.current.leftArrowKey.isPressed;
 
-            bool rightPressed =
+            rightPressed |=
                 Keyboard.current.dKey.isPressed ||
                 Keyboard.current.rightArrowKey.isPressed;
 
-            bool jumpPressed =
+            jumpPressed |=
                 Keyboard.current.wKey.isPressed ||
                 Keyboard.current.upArrowKey.isPressed;
+        }
 
-            bool jumpHeld =
-                Keyboard.current.wKey.isPressed ||
-                Keyboard.current.upArrowKey.isPressed;
+        if (buttonsEnabled == true && !isGameOver)
+        {
 
             // Smooth horizontal acceleration and deceleration.
             float targetSpeed = 0f;
@@ -170,6 +319,8 @@ public class playerScript : MonoBehaviour
         if (gameOverUIShown == true)
         {
             gameOverUI.rootVisualElement.style.display = DisplayStyle.Flex;
+            if (mobileControlsRoot != null)
+                mobileControlsRoot.style.display = DisplayStyle.None;
         }
         else
         {

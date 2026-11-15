@@ -229,3 +229,16 @@
     background-color: rgb(75, 75, 75);
 }
 
+
+
+.medal-icon {
+    width: 22px;
+    height: 22px;
+    align-self: center;
+}
+
+.rank-container {
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}

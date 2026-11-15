@@ -15,6 +15,11 @@
   </head>
 
   <body>
+    <div id="rotate-device-prompt" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:#0b0f19; z-index:99999; flex-direction:column; align-items:center; justify-content:center; color:#ffffff; font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif; text-align:center; padding:20px; box-sizing:border-box;">
+      <div style="font-size:48px; margin-bottom:16px;">🔄</div>
+      <div style="font-size:20px; font-weight:bold; margin-bottom:8px;">Please Rotate Your Device</div>
+      <div style="font-size:14px; color:#94a3b8; max-width:280px;">GitJumps is best played in Landscape orientation for full mobile controls.</div>
+    </div>
     <div id="unity-container">
       <canvas id="unity-canvas" tabindex="-1"></canvas>
       <div id="unity-loading-bar">
@@ -202,6 +207,16 @@
             lastCanvasHeight = canvasHeight;
             lastCanvasDpr = pixelRatio;
 
+            var isMobileDevice = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && window.innerWidth <= 1024);
+            var rotatePrompt = document.querySelector("#rotate-device-prompt");
+            if (rotatePrompt) {
+              if (isMobileDevice && window.innerHeight > window.innerWidth) {
+                rotatePrompt.style.display = "flex";
+              } else {
+                rotatePrompt.style.display = "none";
+              }
+            }
+
             // Fill 100% of available viewport without letterbox margins
             canvas.style.width = canvasWidth + "px";
             canvas.style.height = canvasHeight + "px";
@@ -257,17 +272,17 @@
           } catch(e) {}
 
           var buildUrl = "Build";
-          var loaderUrl = buildUrl + "/GitJumps_v5.loader.js";
+          var loaderUrl = buildUrl + "/GitJumps_v8.loader.js";
 
           var config = {
             arguments: [],
-            dataUrl: buildUrl + "/GitJumps_v5.data.br",
-            frameworkUrl: buildUrl + "/GitJumps_v5.framework.js.br",
-            codeUrl: buildUrl + "/GitJumps_v5.wasm.br",
+            dataUrl: buildUrl + "/GitJumps_v8.data.br",
+            frameworkUrl: buildUrl + "/GitJumps_v8.framework.js.br",
+            codeUrl: buildUrl + "/GitJumps_v8.wasm.br",
             streamingAssetsUrl: "StreamingAssets",
             companyName: "Papa Smurf",
             productName: "GitJumps",
-            productVersion: "1.5",
+            productVersion: "1.8",
             showBanner: unityShowBanner,
           };
 

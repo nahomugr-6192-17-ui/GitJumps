@@ -5,7 +5,7 @@
             <!-- Header Row -->
             <ui:VisualElement class="leaderboard-header-row">
                 <ui:Label text="GLOBAL LEADERBOARD" class="leaderboard-title" />
-                <ui:Button text="✕" name="LeaderboardCloseButton" class="close-button" />
+                <ui:Button text="X" name="LeaderboardCloseButton" class="close-button" />
             </ui:VisualElement>
 
             <!-- Personal Profile Area -->

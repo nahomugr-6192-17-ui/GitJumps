@@ -137,7 +137,7 @@ Deno.serve(async (req: Request) => {
         // Register the endpoint with Telegram using the configured webhook secret
         const setResp = await fetch(`https://api.telegram.org/bot${botToken}/setWebhook`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
           body: JSON.stringify({
             url: targetEndpoint,
             secret_token: webhookSecret,

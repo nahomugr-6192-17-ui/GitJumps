@@ -45,6 +45,17 @@ public class platformSpawnerScript : MonoBehaviour
     public GameObject Destroyer;
     public GameObject LandingBlock;
 
+    private float defaultGapBetweenPlatforms;
+    private float defaultBasePlatformSpeed;
+    private float defaultMinX;
+    private float defaultMaxX;
+    private float defaultPowerUpMinX;
+    private float defaultPowerUpMaxX;
+    private float defaultMinPowerUpGap;
+    private float defaultMaxPowerUpGap;
+    private Vector3 defaultLandingBlockScale;
+    private float defaultLandingBlockY;
+
     [Header("PowerUp Horizontal Movement")]
     public int minStationaryPowerUps = 1;
     public int maxStationaryPowerUps = 4;
@@ -141,9 +152,76 @@ public class platformSpawnerScript : MonoBehaviour
 
         nextMovingPowerUpCount = Random.Range(minStationaryPowerUps, maxStationaryPowerUps + 1);
 
+        defaultGapBetweenPlatforms = gapBetweenPlatforms;
+        defaultBasePlatformSpeed = basePlatformSpeed;
+        defaultMinX = minX;
+        defaultMaxX = maxX;
+        defaultPowerUpMinX = powerUpMinX;
+        defaultPowerUpMaxX = powerUpMaxX;
+        defaultMinPowerUpGap = minPowerUpGap;
+        defaultMaxPowerUpGap = maxPowerUpGap;
+        if (LandingBlock != null)
+        {
+            defaultLandingBlockScale = LandingBlock.transform.localScale;
+            defaultLandingBlockY = LandingBlock.transform.position.y;
+        }
+
+        ApplyScale(ResponsiveGameplayScaler.CurrentScaleFactor);
+        ResponsiveGameplayScaler.OnLayoutChanged += OnLayoutChangedHandler;
+
         AdjustSpawnerForCamera();
         PrewarmInitialPlatforms();
         PrewarmStars();
+    }
+
+    private void OnDestroy()
+    {
+        ResponsiveGameplayScaler.OnLayoutChanged -= OnLayoutChangedHandler;
+    }
+
+    private void OnLayoutChangedHandler(DeviceLayoutMode mode, float scaleFactor)
+    {
+        ApplyScale(scaleFactor);
+    }
+
+    private void ApplyScale(float scaleFactor)
+    {
+        if (scaleFactor <= 0f) scaleFactor = 1f;
+
+        if (ResponsiveGameplayScaler.IsDesktopLayout())
+        {
+            gapBetweenPlatforms = defaultGapBetweenPlatforms;
+            basePlatformSpeed = defaultBasePlatformSpeed;
+            minX = defaultMinX;
+            maxX = defaultMaxX;
+            powerUpMinX = defaultPowerUpMinX;
+            powerUpMaxX = defaultPowerUpMaxX;
+            minPowerUpGap = defaultMinPowerUpGap;
+            maxPowerUpGap = defaultMaxPowerUpGap;
+            if (LandingBlock != null)
+            {
+                LandingBlock.transform.localScale = defaultLandingBlockScale;
+                LandingBlock.transform.position = new Vector3(LandingBlock.transform.position.x, defaultLandingBlockY, LandingBlock.transform.position.z);
+            }
+        }
+        else
+        {
+            gapBetweenPlatforms = defaultGapBetweenPlatforms * scaleFactor;
+            basePlatformSpeed = defaultBasePlatformSpeed * scaleFactor;
+            minX = defaultMinX * scaleFactor;
+            maxX = defaultMaxX * scaleFactor;
+            powerUpMinX = defaultPowerUpMinX * scaleFactor;
+            powerUpMaxX = defaultPowerUpMaxX * scaleFactor;
+            minPowerUpGap = defaultMinPowerUpGap * scaleFactor;
+            maxPowerUpGap = defaultMaxPowerUpGap * scaleFactor;
+            if (LandingBlock != null)
+            {
+                LandingBlock.transform.localScale = defaultLandingBlockScale * scaleFactor;
+                // Floor is at y = -9.71, player's feet are at y = -8.5.
+                // Position LandingBlock at y = -6.0f so the player can effortlessly reach and land on it.
+                LandingBlock.transform.position = new Vector3(LandingBlock.transform.position.x, -6.0f, LandingBlock.transform.position.z);
+            }
+        }
     }
 
     private void RandomizePowerUpHierarchy()
@@ -269,6 +347,19 @@ public class platformSpawnerScript : MonoBehaviour
             Quaternion.identity
         );
 
+        float currentScale = ResponsiveGameplayScaler.CurrentScaleFactor;
+        if (!ResponsiveGameplayScaler.IsDesktopLayout() && currentScale != 1.0f)
+        {
+            newPlatform.transform.localScale = Vector3.one * currentScale;
+            platformScript pScript = newPlatform.GetComponent<platformScript>();
+            if (pScript != null)
+            {
+                pScript.minX = -12f * currentScale;
+                pScript.maxX = 12f * currentScale;
+                pScript.horizontalSpeed = 3f * currentScale;
+            }
+        }
+
         lastSpawnedPlatform = newPlatform.transform;
         lastSpawnedPlatformObject = newPlatform;
         lastSpawnedFrame = Time.frameCount;
@@ -296,6 +387,12 @@ public class platformSpawnerScript : MonoBehaviour
             spawnPosition,
             Quaternion.identity
         );
+
+        float powerScale = ResponsiveGameplayScaler.CurrentScaleFactor;
+        if (!ResponsiveGameplayScaler.IsDesktopLayout() && powerScale != 1.0f)
+        {
+            newPowerUp.transform.localScale = Vector3.one * powerScale;
+        }
 
         powerUpsMovementScript movement =
     newPowerUp.GetComponent<powerUpsMovementScript>();
@@ -521,12 +618,27 @@ public class platformSpawnerScript : MonoBehaviour
 
         // Find the highest pre-existing platform in the scene
         float highestY = 8.88f;
+        float currentScale = ResponsiveGameplayScaler.CurrentScaleFactor;
         GameObject[] containers = GameObject.FindGameObjectsWithTag("BlockContainer");
         foreach (GameObject c in containers)
         {
-            if (c != null && c.transform.position.y > highestY)
+            if (c != null)
             {
-                highestY = c.transform.position.y;
+                if (!ResponsiveGameplayScaler.IsDesktopLayout() && currentScale != 1.0f)
+                {
+                    c.transform.localScale = Vector3.one * currentScale;
+                    platformScript pScript = c.GetComponent<platformScript>();
+                    if (pScript != null)
+                    {
+                        pScript.minX = -12f * currentScale;
+                        pScript.maxX = 12f * currentScale;
+                        pScript.horizontalSpeed = 3f * currentScale;
+                    }
+                }
+                if (c.transform.position.y > highestY)
+                {
+                    highestY = c.transform.position.y;
+                }
             }
         }
 
@@ -537,6 +649,19 @@ public class platformSpawnerScript : MonoBehaviour
             float randomX = Random.Range(minX, maxX);
             Vector3 spawnPosition = new Vector3(randomX, currentY, 0f);
             GameObject newPlatform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity);
+
+            if (!ResponsiveGameplayScaler.IsDesktopLayout() && currentScale != 1.0f)
+            {
+                newPlatform.transform.localScale = Vector3.one * currentScale;
+                platformScript pScript = newPlatform.GetComponent<platformScript>();
+                if (pScript != null)
+                {
+                    pScript.minX = -12f * currentScale;
+                    pScript.maxX = 12f * currentScale;
+                    pScript.horizontalSpeed = 3f * currentScale;
+                }
+            }
+
             spawnedPlatforms.Add(newPlatform.transform);
             lastSpawnedPlatform = newPlatform.transform;
             lastSpawnedPlatformObject = newPlatform;

@@ -91,12 +91,24 @@ public class cameraScript : MonoBehaviour
         // In this local orientation, local X is aligned with world Y.
         // Baseline localScale.x is 2.3f for baseline orthoSize 10.
         float verticalScale = Mathf.Max(2.3f, 2.3f * (orthoSize / baselineOrthoSize) * 1.5f);
+        float halfWidth = orthoSize * (cam != null ? cam.aspect : (16f / 9f));
+
         foreach (Transform child in transform)
         {
             if (child.name.ToLower().Contains("sideblocker") || child.name.ToLower().Contains("side"))
             {
                 Vector3 s = child.localScale;
                 child.localScale = new Vector3(verticalScale, s.y, s.z);
+
+                // Dynamically align blockers with visible screen bounds
+                if (child.localPosition.x > 0)
+                {
+                    child.localPosition = new Vector3(halfWidth - 0.25f, child.localPosition.y, child.localPosition.z);
+                }
+                else if (child.localPosition.x < 0)
+                {
+                    child.localPosition = new Vector3(-(halfWidth - 0.25f), child.localPosition.y, child.localPosition.z);
+                }
             }
         }
     }

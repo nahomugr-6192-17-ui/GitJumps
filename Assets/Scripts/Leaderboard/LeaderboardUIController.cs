@@ -54,6 +54,21 @@ namespace GitJumps.Leaderboard
         private VisualElement emptyState;
         private Label errorMessageLabel;
 
+        // Medal Sprites for WebGL
+        private Sprite goldMedalSprite;
+        private Sprite silverMedalSprite;
+        private Sprite bronzeMedalSprite;
+
+        private void LoadMedalSprites()
+        {
+            if (goldMedalSprite == null)
+                goldMedalSprite = Resources.Load<Sprite>("Medals/Medal_Gold");
+            if (silverMedalSprite == null)
+                silverMedalSprite = Resources.Load<Sprite>("Medals/Medal_Silver");
+            if (bronzeMedalSprite == null)
+                bronzeMedalSprite = Resources.Load<Sprite>("Medals/Medal_Bronze");
+        }
+
         private void Awake()
         {
             if (_instance != null && _instance != this)
@@ -64,6 +79,7 @@ namespace GitJumps.Leaderboard
             }
             _instance = this;
 
+            LoadMedalSprites();
             uiDocument = GetComponent<UIDocument>();
             if (uiDocument != null)
             {
@@ -362,9 +378,9 @@ namespace GitJumps.Leaderboard
 
             if (profileGlobalRank != null)
             {
-                if (profile.global_rank == 1) profileGlobalRank.text = "🥇 #1";
-                else if (profile.global_rank == 2) profileGlobalRank.text = "🥈 #2";
-                else if (profile.global_rank == 3) profileGlobalRank.text = "🥉 #3";
+                if (profile.global_rank == 1) profileGlobalRank.text = "1st Place";
+                else if (profile.global_rank == 2) profileGlobalRank.text = "2nd Place";
+                else if (profile.global_rank == 3) profileGlobalRank.text = "3rd Place";
                 else if (profile.global_rank > 0) profileGlobalRank.text = $"#{profile.global_rank}";
                 else profileGlobalRank.text = "-";
             }
@@ -421,13 +437,41 @@ namespace GitJumps.Leaderboard
             scoreLabel.AddToClassList("col-score");
 
             // Col 3: Leaderboard Position (Medal or Rank Number)
-            Label rankLabel = new Label(entry.rank_display);
-            rankLabel.AddToClassList("row-rank-text");
-            rankLabel.AddToClassList("col-rank");
+            VisualElement rankContainer = new VisualElement();
+            rankContainer.AddToClassList("col-rank");
+            rankContainer.AddToClassList("rank-container");
+
+            if (goldMedalSprite == null || silverMedalSprite == null || bronzeMedalSprite == null)
+            {
+                LoadMedalSprites();
+            }
+
+            Sprite medal = null;
+            if (entry.rank == 1 || entry.rank_display == "🥇") medal = goldMedalSprite;
+            else if (entry.rank == 2 || entry.rank_display == "🥈") medal = silverMedalSprite;
+            else if (entry.rank == 3 || entry.rank_display == "🥉") medal = bronzeMedalSprite;
+
+            if (medal != null)
+            {
+                VisualElement medalIcon = new VisualElement();
+                medalIcon.AddToClassList("medal-icon");
+                medalIcon.style.backgroundImage = new StyleBackground(medal);
+                rankContainer.Add(medalIcon);
+            }
+            else
+            {
+                // Fallback: If sprite is not available, never display invisible emoji characters.
+                // Display numeric rank cleanly.
+                string display = entry.rank > 0 ? entry.rank.ToString() : (entry.rank_display ?? "");
+                display = display.Replace("🥇", "1").Replace("🥈", "2").Replace("🥉", "3");
+                Label rankLabel = new Label(display);
+                rankLabel.AddToClassList("row-rank-text");
+                rankContainer.Add(rankLabel);
+            }
 
             row.Add(nameLabel);
             row.Add(scoreLabel);
-            row.Add(rankLabel);
+            row.Add(rankContainer);
 
             return row;
         }

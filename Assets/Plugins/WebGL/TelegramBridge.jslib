@@ -40,6 +40,22 @@ mergeInto(LibraryManager.library, {
     } catch (e) {
       return 0;
     }
+  },
+
+  GetDeviceFormFactor: function () {
+    try {
+      var ua = navigator.userAgent || "";
+      var isTablet = /iPad|Tablet/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isTablet) return 2; // Tablet
+      var isMobile = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      if (isMobile) return 1; // Mobile Phone
+      if (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && window.innerWidth <= 1024) {
+        return window.innerWidth < 650 ? 1 : 2;
+      }
+      return 0; // Desktop
+    } catch (e) {
+      return 0;
+    }
   }
 });
 

@@ -46,6 +46,11 @@ public static class BuildScript
                 CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.framework.js.br"), Path.Combine(buildDir, "GitJumps_v5.framework.js.br"));
                 CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.wasm.br"), Path.Combine(buildDir, "GitJumps_v5.wasm.br"));
                 CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.loader.js"), Path.Combine(buildDir, "GitJumps_v5.loader.js"));
+
+                CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.data.br"), Path.Combine(buildDir, "GitJumps_v8.data.br"));
+                CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.framework.js.br"), Path.Combine(buildDir, "GitJumps_v8.framework.js.br"));
+                CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.wasm.br"), Path.Combine(buildDir, "GitJumps_v8.wasm.br"));
+                CopyIfExists(Path.Combine(buildDir, "GitJumps - Web.loader.js"), Path.Combine(buildDir, "GitJumps_v8.loader.js"));
             }
 
             if (Application.isBatchMode)

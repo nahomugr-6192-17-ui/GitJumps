@@ -93,6 +93,52 @@
             }
           }
 
+          // ==========================================
+          // BROWSER & TELEGRAM WEB AUDIO UNLOCKER
+          // ==========================================
+          window._audioContexts = window._audioContexts || [];
+          (function () {
+            var AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              var OrigAudioCtx = AudioCtx;
+              function PatchedAudioContext() {
+                var ctx = new OrigAudioCtx();
+                window._audioContexts.push(ctx);
+                return ctx;
+              }
+              PatchedAudioContext.prototype = OrigAudioCtx.prototype;
+              window.AudioContext = PatchedAudioContext;
+              if (window.webkitAudioContext) {
+                window.webkitAudioContext = PatchedAudioContext;
+              }
+            }
+          })();
+
+          function resumeAllWebAudio() {
+            try {
+              if (window._audioContexts) {
+                window._audioContexts.forEach(function (ctx) {
+                  if (ctx && ctx.state === "suspended") {
+                    ctx.resume();
+                  }
+                });
+              }
+              if (window.unityInstance && window.unityInstance.Module && window.unityInstance.Module.WEBAudio && window.unityInstance.Module.WEBAudio.audioContext) {
+                var uCtx = window.unityInstance.Module.WEBAudio.audioContext;
+                if (uCtx && uCtx.state === "suspended") {
+                  uCtx.resume();
+                }
+              }
+            } catch (e) {
+              console.warn("Failed to resume WebAudio context:", e);
+            }
+          }
+
+          ["click", "touchstart", "touchend", "pointerdown", "keydown"].forEach(function (evt) {
+            window.addEventListener(evt, resumeAllWebAudio, { passive: true });
+            document.addEventListener(evt, resumeAllWebAudio, { passive: true });
+          });
+
           // Fallback: If Telegram requires a user interaction gesture for fullscreen
           function tryFullscreenOnUserGesture() {
             if (isTelegram && tg && typeof tg.requestFullscreen === "function" && !tg.isFullscreen) {
@@ -211,17 +257,17 @@
           } catch(e) {}
 
           var buildUrl = "Build";
-          var loaderUrl = buildUrl + "/GitJumps_v4.loader.js";
+          var loaderUrl = buildUrl + "/GitJumps_v5.loader.js";
 
           var config = {
             arguments: [],
-            dataUrl: buildUrl + "/GitJumps_v4.data.br",
-            frameworkUrl: buildUrl + "/GitJumps_v4.framework.js.br",
-            codeUrl: buildUrl + "/GitJumps_v4.wasm.br",
+            dataUrl: buildUrl + "/GitJumps_v5.data.br",
+            frameworkUrl: buildUrl + "/GitJumps_v5.framework.js.br",
+            codeUrl: buildUrl + "/GitJumps_v5.wasm.br",
             streamingAssetsUrl: "StreamingAssets",
             companyName: "Papa Smurf",
             productName: "GitJumps",
-            productVersion: "1.4",
+            productVersion: "1.5",
             showBanner: unityShowBanner,
           };
 
@@ -241,6 +287,8 @@
                 loadingText.innerText = "Loading GitJumps... " + Math.round(progress * 100) + "%";
               }
             }).then(function (unityInstance) {
+              window.unityInstance = unityInstance;
+              resumeAllWebAudio();
               if (loadingBar) {
                 loadingBar.style.display = "none";
               }

@@ -35,6 +35,7 @@ public class HowToPlay : MonoBehaviour
 
     private void OnHowToPlayCompleted()
     {
+        AudioManager.Instance?.PlayBackgroundMusic();
         PlayerPrefs.SetInt(TutorialCompletedKey, 1);
         PlayerPrefs.Save();
 

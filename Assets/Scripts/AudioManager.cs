@@ -50,6 +50,8 @@ public class AudioManager : MonoBehaviour
     public AudioClip JumpClip => jumpClip;
     public AudioClip GameOverClip => gameOverClip;
 
+    private bool isGameOverState = false;
+
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -95,6 +97,36 @@ public class AudioManager : MonoBehaviour
         PlayBackgroundMusic();
     }
 
+    private void Update()
+    {
+        // On WebGL and mobile browsers, autoplay policy may block audio until the first user gesture.
+        // Once the user interacts with the game, start/resume the background music if it was blocked.
+        if (!isGameOverState && musicSource != null && bgMusicClip != null && !musicSource.isPlaying)
+        {
+            if (HasUserInteracted())
+            {
+                PlayBackgroundMusic();
+            }
+        }
+    }
+
+    private bool HasUserInteracted()
+    {
+        var keyboard = UnityEngine.InputSystem.Keyboard.current;
+        if (keyboard != null && keyboard.anyKey.wasPressedThisFrame)
+            return true;
+
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse != null && (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame))
+            return true;
+
+        var touch = UnityEngine.InputSystem.Touchscreen.current;
+        if (touch != null && touch.primaryTouch.press.wasPressedThisFrame)
+            return true;
+
+        return false;
+    }
+
     private void OnDestroy()
     {
         if (_instance == this)
@@ -105,6 +137,8 @@ public class AudioManager : MonoBehaviour
 
     public void PlayBackgroundMusic()
     {
+        isGameOverState = false;
+
         if (musicSource == null || bgMusicClip == null)
             return;
 
@@ -136,6 +170,7 @@ public class AudioManager : MonoBehaviour
 
     public void PlayGameOver()
     {
+        isGameOverState = true;
         StopBackgroundMusic();
 
         if (sfxSource != null && gameOverClip != null)

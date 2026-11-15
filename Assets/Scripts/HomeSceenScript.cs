@@ -158,6 +158,7 @@ public class HomeSceenScript : MonoBehaviour
 
     private void OnPlayClicked(ClickEvent ev)
     {
+        AudioManager.Instance?.PlayBackgroundMusic();
         GitJumps.Leaderboard.SupabaseLeaderboardManager.Instance?.TrackGameStarted();
 
         bool tutorialCompleted =
@@ -175,6 +176,7 @@ public class HomeSceenScript : MonoBehaviour
 
     private void OnHowToClicked(ClickEvent ev)
     {
+        AudioManager.Instance?.PlayBackgroundMusic();
         SceneManager.LoadScene("HowToPlayScene");
     }
 

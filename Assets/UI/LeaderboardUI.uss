@@ -12,14 +12,14 @@
 
 .leaderboard-modal {
     width: 680px;
-    max-width: 90%;
-    height: 620px;
-    max-height: 90%;
+    max-width: 94%;
+    height: 480px;
+    max-height: 94%;
     background-color: rgb(28, 28, 28);
     border-width: 2px;
     border-color: rgb(75, 75, 75);
-    border-radius: 16px;
-    padding: 20px;
+    border-radius: 14px;
+    padding: 12px 16px;
     display: flex;
     flex-direction: column;
 }
@@ -28,24 +28,24 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .leaderboard-title {
-    font-size: 26px;
+    font-size: 22px;
     color: rgb(255, 255, 255);
     -unity-font-style: bold;
 }
 
 .close-button {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     background-color: rgb(45, 45, 45);
     color: rgb(220, 220, 220);
-    border-radius: 18px;
+    border-radius: 16px;
     border-width: 1px;
     border-color: rgb(100, 100, 100);
-    font-size: 18px;
+    font-size: 16px;
     -unity-text-align: middle-center;
 }
 
@@ -59,9 +59,9 @@
     background-color: rgb(38, 38, 38);
     border-width: 1px;
     border-color: rgb(85, 85, 85);
-    border-radius: 12px;
-    padding: 10px 16px;
-    margin-bottom: 14px;
+    border-radius: 10px;
+    padding: 8px 14px;
+    margin-bottom: 10px;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;

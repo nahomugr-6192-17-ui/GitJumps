@@ -78,7 +78,15 @@ public class cameraScript : MonoBehaviour
             // Landscape (16:9 or wider): standard baseline size and coordinates
             cam.orthographicSize = baselineOrthoSize;
             effectiveGameplayY = gameplayCameraY;
-            effectiveInitialY = initialCameraY;
+            // On mobile / tablet or wide mobile landscape (e.g. 854x393), anchor initial camera Y at -1.4f so the floor is clearly visible at start
+            if (!ResponsiveGameplayScaler.IsDesktopLayout() || currentAspect > 1.85f)
+            {
+                effectiveInitialY = -1.4f;
+            }
+            else
+            {
+                effectiveInitialY = initialCameraY;
+            }
             effectiveFallCameraY = fallCameraY;
 
             UpdateSideBlockers(baselineOrthoSize);
@@ -118,6 +126,19 @@ public class cameraScript : MonoBehaviour
         if (player != null)
         {
             playerRb = player.GetComponent<Rigidbody2D>();
+        }
+
+        UpdateCameraFraming();
+
+        // Ensure floor extends edge-to-edge horizontally across the entire screen right from the start
+        if (ground != null && cam != null)
+        {
+            float requiredGroundWidth = Mathf.Max(48f, cam.orthographicSize * cam.aspect * 2.5f);
+            ground.transform.localScale = new Vector3(
+                requiredGroundWidth,
+                ground.transform.localScale.y,
+                ground.transform.localScale.z
+            );
         }
 
         transform.position = new Vector3(

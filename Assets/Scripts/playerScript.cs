@@ -200,24 +200,24 @@ public class playerScript : MonoBehaviour
             // Mobile / Tablet: display touch buttons
             mobileControlsRoot.style.display = DisplayStyle.Flex;
 
-            float btnSize = (mode == DeviceLayoutMode.Tablet) ? 140f : 126f;
-            float jumpBtnWidth = (mode == DeviceLayoutMode.Tablet) ? 180f : 160f;
-            float jumpBtnHeight = (mode == DeviceLayoutMode.Tablet) ? 140f : 126f;
+            float btnWidth = (mode == DeviceLayoutMode.Tablet) ? 114f : 96f;
+            float btnHeight = (mode == DeviceLayoutMode.Tablet) ? 80f : 72f;
+            float jumpWidth = (mode == DeviceLayoutMode.Tablet) ? 144f : 120f;
 
             if (btnMoveLeft != null)
             {
-                btnMoveLeft.style.width = btnSize;
-                btnMoveLeft.style.height = btnSize;
+                btnMoveLeft.style.width = btnWidth;
+                btnMoveLeft.style.height = btnHeight;
             }
             if (btnMoveRight != null)
             {
-                btnMoveRight.style.width = btnSize;
-                btnMoveRight.style.height = btnSize;
+                btnMoveRight.style.width = btnWidth;
+                btnMoveRight.style.height = btnHeight;
             }
             if (btnJump != null)
             {
-                btnJump.style.width = jumpBtnWidth;
-                btnJump.style.height = jumpBtnHeight;
+                btnJump.style.width = jumpWidth;
+                btnJump.style.height = btnHeight;
             }
         }
     }

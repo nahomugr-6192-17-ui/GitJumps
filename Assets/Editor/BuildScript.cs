@@ -5,7 +5,7 @@ using System.IO;
 
 public static class BuildScript
 {
-    [MenuItem("Build/Build WebGL")]
+    [MenuItem("Tools/Build WebGL")]
     public static void BuildWebGL()
     {
         string[] scenes = new string[]

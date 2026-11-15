@@ -200,9 +200,9 @@ public class playerScript : MonoBehaviour
             // Mobile / Tablet: display touch buttons
             mobileControlsRoot.style.display = DisplayStyle.Flex;
 
-            float btnWidth = (mode == DeviceLayoutMode.Tablet) ? 114f : 96f;
-            float btnHeight = (mode == DeviceLayoutMode.Tablet) ? 80f : 72f;
-            float jumpWidth = (mode == DeviceLayoutMode.Tablet) ? 144f : 120f;
+            float btnWidth = (mode == DeviceLayoutMode.Tablet) ? 148f : 128f;
+            float btnHeight = (mode == DeviceLayoutMode.Tablet) ? 104f : 90f;
+            float jumpWidth = (mode == DeviceLayoutMode.Tablet) ? 180f : 155f;
 
             if (btnMoveLeft != null)
             {

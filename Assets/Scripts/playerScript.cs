@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
@@ -81,9 +81,9 @@ public class playerScript : MonoBehaviour
     private bool isMobileRightHeld = false;
     private bool isMobileJumpHeld = false;
     private VisualElement mobileControlsRoot;
-    private Button btnMoveLeft;
-    private Button btnMoveRight;
-    private Button btnJump;
+    private VisualElement btnMoveLeft;
+    private VisualElement btnMoveRight;
+    private VisualElement btnJump;
     private Vector3 initialPlayerScale;
     private float initialMoveSpeed;
     private float initialJumpForce;
@@ -131,9 +131,9 @@ public class playerScript : MonoBehaviour
         if (currentScoreUI != null && currentScoreUI.rootVisualElement != null)
         {
             mobileControlsRoot = currentScoreUI.rootVisualElement.Q<VisualElement>("mobile-controls-root");
-            btnMoveLeft = currentScoreUI.rootVisualElement.Q<Button>("btn-move-left");
-            btnMoveRight = currentScoreUI.rootVisualElement.Q<Button>("btn-move-right");
-            btnJump = currentScoreUI.rootVisualElement.Q<Button>("btn-jump");
+            btnMoveLeft = currentScoreUI.rootVisualElement.Q<VisualElement>("btn-move-left");
+            btnMoveRight = currentScoreUI.rootVisualElement.Q<VisualElement>("btn-move-right");
+            btnJump = currentScoreUI.rootVisualElement.Q<VisualElement>("btn-jump");
 
             UpdateMobileControlsDisplay(ResponsiveGameplayScaler.ActiveLayoutMode, ResponsiveGameplayScaler.CurrentScaleFactor);
 
@@ -219,48 +219,97 @@ public class playerScript : MonoBehaviour
                 btnJump.style.width = jumpWidth;
                 btnJump.style.height = btnHeight;
             }
+
+            mobileControlsRoot.pickingMode = PickingMode.Position;
+
+            if (btnMoveLeft != null)
+                btnMoveLeft.pickingMode = PickingMode.Position;
+
+            if (btnMoveRight != null)
+                btnMoveRight.pickingMode = PickingMode.Position;
+
+            if (btnJump != null)
+                btnJump.pickingMode = PickingMode.Position;
         }
     }
 
-    private void SetupTouchButton(Button btn, System.Action<bool> stateSetter)
+
+
+    private void SetupTouchButton(
+        VisualElement btn,
+        System.Action<bool> stateSetter)
     {
         if (btn == null) return;
 
+        HashSet<int> activePointers = new HashSet<int>();
+
+        Color normalColor = new Color(0.07f, 0.09f, 0.13f, 0.78f);
+        Color pressedColor = new Color(0.22f, 0.38f, 0.55f, 0.98f);
+
+        void RefreshState()
+        {
+            bool pressed = activePointers.Count > 0;
+
+            // Update gameplay input immediately.
+            stateSetter(pressed);
+
+            // Update button appearance immediately.
+            btn.style.backgroundColor = new StyleColor(
+                pressed ? pressedColor : normalColor
+            );
+        }
+
         btn.RegisterCallback<PointerDownEvent>(evt =>
         {
-            stateSetter(true);
-            btn.CapturePointer(evt.pointerId);
-            btn.style.backgroundColor = new StyleColor(new Color(0.22f, 0.28f, 0.38f, 0.95f));
-        });
+            if (activePointers.Add(evt.pointerId))
+            {
+                btn.CapturePointer(evt.pointerId);
+                RefreshState();
+            }
+        }, TrickleDown.TrickleDown);
 
         btn.RegisterCallback<PointerUpEvent>(evt =>
         {
-            stateSetter(false);
+            if (activePointers.Remove(evt.pointerId))
+            {
+                RefreshState();
+            }
+
             if (btn.HasPointerCapture(evt.pointerId))
                 btn.ReleasePointer(evt.pointerId);
-            btn.style.backgroundColor = new StyleColor(new Color(0.07f, 0.09f, 0.13f, 0.78f));
-        });
+
+        }, TrickleDown.TrickleDown);
 
         btn.RegisterCallback<PointerCancelEvent>(evt =>
         {
-            stateSetter(false);
+            if (activePointers.Remove(evt.pointerId))
+            {
+                RefreshState();
+            }
+
             if (btn.HasPointerCapture(evt.pointerId))
                 btn.ReleasePointer(evt.pointerId);
-            btn.style.backgroundColor = new StyleColor(new Color(0.07f, 0.09f, 0.13f, 0.78f));
+
+        }, TrickleDown.TrickleDown);
+
+        btn.RegisterCallback<PointerCaptureOutEvent>(evt =>
+        {
+            if (activePointers.Remove(evt.pointerId))
+            {
+                RefreshState();
+            }
         });
 
-        btn.RegisterCallback<PointerLeaveEvent>(evt =>
+        btn.RegisterCallback<DetachFromPanelEvent>(evt =>
         {
-            if (!btn.HasPointerCapture(evt.pointerId))
-            {
-                stateSetter(false);
-                btn.style.backgroundColor = new StyleColor(new Color(0.07f, 0.09f, 0.13f, 0.78f));
-            }
+            activePointers.Clear();
+            RefreshState();
         });
     }
 
+
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         bool leftPressed = isMobileLeftHeld;
         bool rightPressed = isMobileRightHeld;
